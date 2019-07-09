@@ -1,0 +1,50 @@
+{
+  "stack": "dotnet",
+  "memory": 256,
+  "runtimeArgs": [
+  ],
+  "routes": {
+    "printHeaders": {
+      "path": "/affirm/print-headers",
+      "public": true
+    },
+    "printHeadersPriv": {
+      "path": "/affirm/print-headers-priv",
+      "public": false
+    },
+    "paymentMethods": {
+      "path": "/affirm/payment-provider/payment-methods",
+      "public": true
+    },
+    "createPaymentAsync": {
+      "path": "/affirm/payment-provider/payments",
+      "public": true
+    },
+    "cancelPaymentAsync": {
+      "path": "/affirm/payment-provider/payments/:paymentId/cancellations",
+      "public": true
+    },
+    "capturePaymentAsync": {
+      "path": "/affirm/payment-provider/payments/:paymentId/settlements",
+      "public": true
+    },
+    "refundPaymentAsync": {
+      "path": "/affirm/payment-provider/payments/:paymentId/refunds",
+      "public": true
+    },
+    "getPaymentRequestAsync": {
+      "path": "/affirm/payment-provider/payments/:paymentIdentifier/request",
+      "public": true
+    },
+    "authorizeAsync": {
+      "path": "/affirm/payment-provider/payments/:paymentIdentifier/auth/:token",
+      "public": true
+    }
+  },
+  "events": {
+    "onAppsLinked": {
+      "sender": "apps",
+      "keys": ["linked"]
+    }
+  }
+}

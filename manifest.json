@@ -1,0 +1,47 @@
+{
+  "name": "affirm",
+  "vendor": "vtex",
+  "version": "0.0.1",
+  "title": "Affirm",
+  "description": "An implentation of Affirm",
+  "categories": [],
+  "settingsSchema": {},
+  "registries": [
+    "smartcheckout"
+  ],
+  "builders": {
+    "dotnet": "0.x"
+  },
+  "mustUpdateAt": "2018-09-05",
+  "scripts": {
+    "postreleasy": "vtex publish --verbose"
+  },
+  "policies": [
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "bnb.data.bl.uk"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "nuget.org"
+      }
+    },
+    {
+      "name": "ADMIN_DS"
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/api/dataentities/*"
+      }
+    },
+    {
+      "name": "vbase-read-write"
+    }
+  ],
+  "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
+}

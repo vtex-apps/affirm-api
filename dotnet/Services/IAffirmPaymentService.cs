@@ -3,9 +3,6 @@
     using Affirm.Models;
     using System.Threading.Tasks;
 
-    /// <summary>
-    /// https://documenter.getpostman.com/view/487146/7LjCQ6a
-    /// </summary>
     public interface IAffirmPaymentService
     {
         Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest createPaymentRequest);

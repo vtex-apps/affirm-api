@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Affirm", "dotnet\Affirm.csproj", "{0F570733-A8AD-4BA4-B458-A3C2D8186361}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Affirm", "dotnet\Affirm.csproj", "{0F570733-A8AD-4BA4-B458-A3C2D8186361}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{A65A6922-F18D-4487-980C-E892F6E16D14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{0F570733-A8AD-4BA4-B458-A3C2D8186361}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F570733-A8AD-4BA4-B458-A3C2D8186361}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F570733-A8AD-4BA4-B458-A3C2D8186361}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A65A6922-F18D-4487-980C-E892F6E16D14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A65A6922-F18D-4487-980C-E892F6E16D14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A65A6922-F18D-4487-980C-E892F6E16D14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A65A6922-F18D-4487-980C-E892F6E16D14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

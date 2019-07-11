@@ -10,19 +10,25 @@
     public class AffirmPaymentService : IAffirmPaymentService
     {
         private readonly IPaymentRequestRepository _paymentRequestRepository;
-        private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        //private readonly HttpClient _httpClient;
+        //private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AffirmPaymentService(IPaymentRequestRepository paymentRequestRepository, IHttpContextAccessor httpContextAccessor, HttpClient httpClient)
+        //public AffirmPaymentService(IPaymentRequestRepository paymentRequestRepository, IHttpContextAccessor httpContextAccessor, HttpClient httpClient)
+        //{
+        //    this._paymentRequestRepository = paymentRequestRepository ??
+        //                                    throw new ArgumentNullException(nameof(paymentRequestRepository));
+
+        //    this._httpContextAccessor = httpContextAccessor ??
+        //                                throw new ArgumentNullException(nameof(httpContextAccessor));
+
+        //    this._httpClient = httpClient ??
+        //                       throw new ArgumentNullException(nameof(httpClient));
+        //}
+
+        public AffirmPaymentService(IPaymentRequestRepository paymentRequestRepository)
         {
             this._paymentRequestRepository = paymentRequestRepository ??
                                             throw new ArgumentNullException(nameof(paymentRequestRepository));
-
-            this._httpContextAccessor = httpContextAccessor ??
-                                        throw new ArgumentNullException(nameof(httpContextAccessor));
-
-            this._httpClient = httpClient ??
-                               throw new ArgumentNullException(nameof(httpClient));
         }
 
         public async Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest createPaymentRequest)
@@ -56,7 +62,8 @@
                 isLive = !publicKeyArray[1].Equals("test");
             }
 
-            AffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            //IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            IAffirmAPI affirmAPI = new AffirmAPI(isLive);
             dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.paymentId);
 
             CancelPaymentResponse cancelPaymentResponse = new CancelPaymentResponse
@@ -86,7 +93,8 @@
                 isLive = !publicKeyArray[1].Equals("test");
             }
 
-            AffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            //IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            IAffirmAPI affirmAPI = new AffirmAPI(isLive);
             dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.requestId, capturePaymentRequest.paymentId, string.Empty, string.Empty);
 
             CapturePaymentResponse capturePaymentResponse = new CapturePaymentResponse
@@ -119,7 +127,8 @@
 
             int amount = decimal.ToInt32(refundPaymentRequest.value * 100);
 
-            AffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            //IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            IAffirmAPI affirmAPI = new AffirmAPI(isLive);
             dynamic affirmResponse = await affirmAPI.RefundAsync(publicKey, privateKey, refundPaymentRequest.requestId, amount);
 
             RefundPaymentResponse refundPaymentResponse = new RefundPaymentResponse
@@ -152,7 +161,8 @@
                 isLive = !publicKeyArray[1].Equals("test");
             }
 
-            AffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            //IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            IAffirmAPI affirmAPI = new AffirmAPI(isLive);
             dynamic affirmResponse = await affirmAPI.AuthorizeAsync(publicKey, privateKey, token, paymentIdentifier);
             int amount = affirmResponse.amount;
 

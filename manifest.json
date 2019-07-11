@@ -40,6 +40,27 @@
       }
     },
     {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexpayments.com.br",
+        "path": "/api/*"
+      }
+    },
+	{
+      "name": "outbound-access",
+      "attrs": {
+        "host": "sandbox.affirm.com",
+        "path": "/api/v2/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.affirm.com",
+        "path": "/api/v2/*"
+      }
+    },
+    {
       "name": "vbase-read-write"
     }
   ],

@@ -6,6 +6,7 @@
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Xml;
     using Affirm.Models;
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
@@ -15,14 +16,21 @@
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly string _environment;
+        private string affirmBaseUrl;
         private const string APPLICATION_JSON = "application/json";
+
+        public AffirmAPI(bool isLive)
+        {
+            string prefix = isLive ? "api" : "sandbox";
+            this.affirmBaseUrl = $"http://{prefix}.affirm.com/api/v2";
+        }
 
         public AffirmAPI(IHttpContextAccessor httpContextAccessor, HttpClient httpClient, bool isLive)
         {
             this._httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             this._httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            this._environment = isLive ? "api" : "sandbox";
+            string prefix = isLive ? "api" : "sandbox";
+            this.affirmBaseUrl = $"https://{prefix}.affirm.com/api/v2";
         }
 
         public async Task<JObject> AuthorizeAsync(string publicApiKey, string privateApiKey, string checkoutToken, string orderId)
@@ -37,7 +45,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"http://{_environment}.affirm.com/api/v2/charges"),
+                RequestUri = new Uri($"{affirmBaseUrl}/charges"),
                 Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
             };
 
@@ -62,7 +70,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"http://{_environment}.affirm.com/api/v2/charges/{chargeId}/capture"),
+                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}/capture"),
                 Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
             };
 
@@ -79,15 +87,45 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"http://{_environment}.affirm.com/api/v2/checkout/{checkoutId}")
+                RequestUri = new Uri($"{affirmBaseUrl}/checkout/{checkoutId}")
             };
 
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
+            //var base64authorization = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{ publicApiKey}:{ privateApiKey}"));
+            //request.Headers.TryAddWithoutValidation("Authorization", $"Basic {base64authorization}");
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
+            JObject parsedResponse = null;
+            if (response.IsSuccessStatusCode)
+            {
+                try
+                {
+                    parsedResponse = JObject.Parse(responseContent);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error parsing success response: {ex.Message}");
+                    Console.WriteLine($"Response: {responseContent}");
+                }
+            }
+            else
+            {
+                try
+                {
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(responseContent);
+                    string json = JsonConvert.SerializeXmlNode(doc);
+                    parsedResponse = JObject.Parse(json);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error parsing failure response: {ex.Message}");
+                    Console.WriteLine($"Response: {responseContent}");
+                }
+            }
 
-            return JObject.Parse(responseContent);
+            return parsedResponse;
         }
 
         public async Task<JObject> ReadChargeAsync(string publicApiKey, string privateApiKey, string chargeId)
@@ -95,7 +133,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"http://{_environment}.affirm.com/api/v2/charges/{chargeId}/")
+                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}/")
             };
 
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
@@ -117,7 +155,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"http://{_environment}.affirm.com/api/v2/charges/{chargeId}/refund"),
+                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}/refund"),
                 Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
             };
 
@@ -143,7 +181,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"http://{_environment}.affirm.com/api/v2/charges/{chargeId}/update"),
+                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}/update"),
                 Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
             };
 
@@ -160,7 +198,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"http://{_environment}.affirm.com/api/v2/charges/{chargeId}/update")
+                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}/update")
             };
 
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));

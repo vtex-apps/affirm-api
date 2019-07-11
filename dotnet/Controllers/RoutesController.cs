@@ -1,8 +1,9 @@
-﻿namespace Affirm
+﻿namespace Affirm.Controllers
 {
     using Affirm.Models;
     using Affirm.Services;
     using Microsoft.AspNetCore.Mvc;
+    using Newtonsoft.Json;
     using System;
     using System.Threading.Tasks;
 
@@ -10,9 +11,9 @@
     {
         private readonly IAffirmPaymentService _affirmPaymentService;
 
-        public RoutesController(IAffirmPaymentService AffirmPaymentService)
+        public RoutesController(IAffirmPaymentService affirmPaymentService)
         {
-            this._affirmPaymentService = AffirmPaymentService ?? throw new ArgumentNullException(nameof(AffirmPaymentService));
+            this._affirmPaymentService = affirmPaymentService ?? throw new ArgumentNullException(nameof(affirmPaymentService));
         }
 
         /// <summary>
@@ -21,8 +22,10 @@
         /// </summary>
         /// <param name="createPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<IActionResult> CreatePaymentAsync([FromBody] CreatePaymentRequest createPaymentRequest)
+        public async Task<IActionResult> CreatePaymentAsync()
         {
+            var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+            CreatePaymentRequest createPaymentRequest = JsonConvert.DeserializeObject<CreatePaymentRequest>(bodyAsText);
             var paymentResponse = await this._affirmPaymentService.CreatePaymentAsync(createPaymentRequest);
 
             Response.Headers.Add("Cache-Control", "private");

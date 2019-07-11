@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
-
-namespace Affirm
+namespace Affirm.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
 
     public class EventsController : Controller
     {

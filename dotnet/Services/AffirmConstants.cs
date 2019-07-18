@@ -20,6 +20,7 @@ namespace Affirm.Services
         public const string SuccessResponseCode = "auth";
 
         public const string PrivateKeyHeader = "X-PROVIDER-API-AppToken";
-        public const string PublicKeyHeader ="X-PROVIDER-API-AppKey";
+        public const string PublicKeyHeader = "X-PROVIDER-API-AppKey";
+        public const string IsProduction = "X-Vtex-Workspace-Is-Production";
     }
 }

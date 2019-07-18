@@ -5,16 +5,18 @@
 
     public interface IAffirmPaymentService
     {
-        Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest createPaymentRequest);
+        Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest createPaymentRequest, string publicKey);
 
-        Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey);
+        Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey, bool isLive);
 
-        Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey);
+        Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey, bool isLive);
 
-        Task<RefundPaymentResponse> RefundPaymentAsync(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey);
+        Task<RefundPaymentResponse> RefundPaymentAsync(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey, bool isLive);
 
-        Task<CreatePaymentRequest> GetCreatePaymentRequest(string paymentIdentifier);
+        Task<CreatePaymentRequest> GetCreatePaymentRequestAsync(string paymentIdentifier);
 
-        Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey);
+        Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, bool isLive);
+
+        Task<object> ReadChargeAsync(string paymentId, string publicKey, string privateKey, bool isLive);
     }
 }

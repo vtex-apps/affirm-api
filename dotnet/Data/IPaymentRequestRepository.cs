@@ -3,8 +3,6 @@
     using Affirm.Models;
     using System.Threading.Tasks;
 
-    // An interface which defines what data should be retrieved. 
-    // It doesnt make any assumption about how the data should be retrieved.
     public interface IPaymentRequestRepository
     {
         Task<CreatePaymentRequest> GetPaymentRequestAsync(string paymentIdentifier);

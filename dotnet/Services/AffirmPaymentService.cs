@@ -10,28 +10,33 @@
     public class AffirmPaymentService : IAffirmPaymentService
     {
         private readonly IPaymentRequestRepository _paymentRequestRepository;
-        //private readonly HttpClient _httpClient;
-        //private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly HttpClient _httpClient;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        //public AffirmPaymentService(IPaymentRequestRepository paymentRequestRepository, IHttpContextAccessor httpContextAccessor, HttpClient httpClient)
-        //{
-        //    this._paymentRequestRepository = paymentRequestRepository ??
-        //                                    throw new ArgumentNullException(nameof(paymentRequestRepository));
-
-        //    this._httpContextAccessor = httpContextAccessor ??
-        //                                throw new ArgumentNullException(nameof(httpContextAccessor));
-
-        //    this._httpClient = httpClient ??
-        //                       throw new ArgumentNullException(nameof(httpClient));
-        //}
-
-        public AffirmPaymentService(IPaymentRequestRepository paymentRequestRepository)
+        public AffirmPaymentService(IPaymentRequestRepository paymentRequestRepository, IHttpContextAccessor httpContextAccessor, HttpClient httpClient)
         {
             this._paymentRequestRepository = paymentRequestRepository ??
                                             throw new ArgumentNullException(nameof(paymentRequestRepository));
+
+            this._httpContextAccessor = httpContextAccessor ??
+                                        throw new ArgumentNullException(nameof(httpContextAccessor));
+
+            this._httpClient = httpClient ??
+                               throw new ArgumentNullException(nameof(httpClient));
         }
 
-        public async Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest createPaymentRequest)
+        //public AffirmPaymentService(IPaymentRequestRepository paymentRequestRepository)
+        //{
+        //    this._paymentRequestRepository = paymentRequestRepository ??
+        //                                    throw new ArgumentNullException(nameof(paymentRequestRepository));
+        //}
+
+        /// <summary>
+        /// Creates a new payment and/or initiates the payment flow.
+        /// </summary>
+        /// <param name="createPaymentRequest"></param>
+        /// <returns></returns>
+        public async Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest createPaymentRequest, string publicKey)
         {
             CreatePaymentResponse paymentResponse = new CreatePaymentResponse();
             string paymentIdentifier = Guid.NewGuid().ToString();
@@ -42,28 +47,19 @@
             paymentResponse.status = "undefined";
             paymentResponse.tid = createPaymentRequest.reference; // Using reference because we don't have an identifier from the provider yet.
             string redirectUrl = "/affirm-payment";
-            paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}";
+            paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
 
             return paymentResponse;
         }
 
         /// <summary>
-        /// Making function async to support future API integration
+        /// Cancels a payment that was not yet approved or captured (settled).
         /// </summary>
         /// <param name="cancelPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey)
+        public async Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey, bool isLive)
         {
-            bool isLive = true;
-            string[] publicKeyArray = publicKey.Split('|');
-            publicKey = publicKeyArray[0];
-            if (publicKeyArray.Length > 1)
-            {
-                isLive = !publicKeyArray[1].Equals("test");
-            }
-
-            //IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            IAffirmAPI affirmAPI = new AffirmAPI(isLive);
+            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.paymentId);
 
             CancelPaymentResponse cancelPaymentResponse = new CancelPaymentResponse
@@ -79,29 +75,20 @@
         }
 
         /// <summary>
-        /// Making function async to support future API integration
+        /// Captures (settle) a payment that was previously approved.
         /// </summary>
         /// <param name="capturePaymentRequest"></param>
         /// <returns></returns>
-        public async Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey)
+        public async Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey, bool isLive)
         {
-            bool isLive = true;
-            string[] publicKeyArray = publicKey.Split('|');
-            publicKey = publicKeyArray[0];
-            if (publicKeyArray.Length > 1)
-            {
-                isLive = !publicKeyArray[1].Equals("test");
-            }
-
-            //IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            IAffirmAPI affirmAPI = new AffirmAPI(isLive);
+            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.requestId, capturePaymentRequest.paymentId, string.Empty, string.Empty);
 
             CapturePaymentResponse capturePaymentResponse = new CapturePaymentResponse
             {
                 paymentId = capturePaymentRequest.paymentId,
                 settleId = affirmResponse.transaction_id,
-                value = affirmResponse.amount/100,
+                value = affirmResponse.amount == null ? 0m : affirmResponse.amount/100,
                 code = affirmResponse.type,
                 message = affirmResponse.id,
                 requestId = capturePaymentRequest.requestId
@@ -111,31 +98,22 @@
         }
 
         /// <summary>
-        /// Making function async to support future API integration
+        /// Refunds a payment that was previously captured (settled). You can expect partial refunds.
         /// </summary>
         /// <param name="refundPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<RefundPaymentResponse> RefundPaymentAsync(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey)
+        public async Task<RefundPaymentResponse> RefundPaymentAsync(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey, bool isLive)
         {
-            bool isLive = true;
-            string[] publicKeyArray = publicKey.Split('|');
-            publicKey = publicKeyArray[0];
-            if (publicKeyArray.Length > 1)
-            {
-                isLive = !publicKeyArray[1].Equals("test");
-            }
-
             int amount = decimal.ToInt32(refundPaymentRequest.value * 100);
 
-            //IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            IAffirmAPI affirmAPI = new AffirmAPI(isLive);
+            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.RefundAsync(publicKey, privateKey, refundPaymentRequest.requestId, amount);
 
             RefundPaymentResponse refundPaymentResponse = new RefundPaymentResponse
             {
                 paymentId = refundPaymentRequest.paymentId,
                 refundId = affirmResponse.transaction_id,
-                value = affirmResponse.amount / 100,
+                value = affirmResponse.amount == null ? 0m : affirmResponse.amount / 100,
                 code = affirmResponse.type,
                 message = affirmResponse.id,
                 requestId = refundPaymentRequest.requestId
@@ -144,27 +122,34 @@
             return refundPaymentResponse;
         }
 
-        public async Task<CreatePaymentRequest> GetCreatePaymentRequest(string paymentIdentifier)
+        /// <summary>
+        /// Retrieve saved Payment Request
+        /// </summary>
+        /// <param name="paymentIdentifier"></param>
+        /// <returns></returns>
+        public async Task<CreatePaymentRequest> GetCreatePaymentRequestAsync(string paymentIdentifier)
         {
             CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(paymentIdentifier);
 
             return paymentRequest;
         }
 
-        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey)
+        /// <summary>
+        /// After completing the checkout flow and receiving the checkout token, authorize the charge.
+        /// Authorizing generates a charge ID that you’ll use to reference the charge moving forward.
+        /// You must authorize a charge to fully create it. A charge is not visible in the Read response,
+        /// nor in the merchant dashboard until you authorize it.
+        /// </summary>
+        /// <param name="paymentIdentifier"></param>
+        /// <param name="token"></param>
+        /// <param name="publicKey"></param>
+        /// <param name="privateKey"></param>
+        /// <returns></returns>
+        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, bool isLive)
         {
-            bool isLive = true;
-            string[] publicKeyArray = publicKey.Split('|');
-            publicKey = publicKeyArray[0];
-            if (publicKeyArray.Length > 1)
-            {
-                isLive = !publicKeyArray[1].Equals("test");
-            }
-
-            //IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            IAffirmAPI affirmAPI = new AffirmAPI(isLive);
+            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.AuthorizeAsync(publicKey, privateKey, token, paymentIdentifier);
-            int amount = affirmResponse.amount;
+            //int amount = affirmResponse.amount;
 
             // Retrieve the original Payment Request from storage
             CreatePaymentRequest createPaymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(paymentIdentifier);
@@ -172,19 +157,28 @@
             CreatePaymentResponse paymentResponse = new CreatePaymentResponse();
             paymentResponse.paymentId = createPaymentRequest.paymentId;
             string paymentStatus = "denied";
-            if(amount > 0)
+            if(affirmResponse.status == "authorized")
             {
                 paymentStatus = "approved";
             }
 
             paymentResponse.status = paymentStatus;
             paymentResponse.tid = affirmResponse.id;
-
+            paymentResponse.authorizationId = affirmResponse.id;
+            paymentResponse.code = affirmResponse.status;
             paymentResponse.message = affirmResponse.events;
 
             await this._paymentRequestRepository.PostCallbackResponse(createPaymentRequest, paymentResponse);
 
             return paymentResponse;
+        }
+
+        public async Task<object> ReadChargeAsync(string paymentId, string publicKey, string privateKey, bool isLive)
+        {
+            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            dynamic affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, paymentId);
+
+            return affirmResponse;
         }
     }
 }

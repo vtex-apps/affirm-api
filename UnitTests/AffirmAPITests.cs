@@ -14,8 +14,15 @@ namespace UnitTests
         readonly HttpContextAccessor contextAccessor = new HttpContextAccessor();
         readonly HttpClient httpClient = new HttpClient();
 
+        // UU sandbox
         const string privateKey = "jIRab2ct4mUnxltiNgrN0v3uFBpIvZHJ";
         const string publicKey = "1WWKWI5U36GAG5OV";
+        // UU prod
+        //const string privateKey = "HQVQobWqxTjNDeyoZba6SeWBkWAePwfX";
+        //const string publicKey = "RO3VDMNLGGTF2TL8";
+        // Moto sandbox
+        //const string privateKey = "WqPPYUp0RJwjS2mg5oMOqmtnRQ9Qqo1n";
+        //const string publicKey = "84971L7SGAB1MVTX";
 
         private string GetDynamicValue(string name, dynamic dynamicObject)
         {
@@ -38,13 +45,70 @@ namespace UnitTests
         public async Task TestMethod1()
         {
             IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
-            dynamic response = await affirmAPI.ReadAsync(publicKey, privateKey, "test");
+            dynamic response = await affirmAPI.ReadAsync(publicKey, privateKey, "9XE8-EJX1");
             if(response != null)
             {
-                string status_code = GetDynamicValue("status_code", response);
-                string message = GetDynamicValue("message", response);
-                string code = GetDynamicValue("code", response);
-                string type = GetDynamicValue("type", response);
+                //response = GetDynamicValue("?xml", response);
+                //string status_code = GetDynamicValue("status_code", response);
+                //string message = GetDynamicValue("message", response);
+                //string code = GetDynamicValue("code", response);
+                //string type = GetDynamicValue("type", response);
+                string status_code = response.status_code;
+                string message = response.message;
+                string code = response.code;
+                string type = response.type;
+            }
+            else
+            {
+                Console.WriteLine(response);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestMethod2()
+        {
+            IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
+            dynamic response = await affirmAPI.ReadChargeAsync(publicKey, privateKey, "9XE8-EJX1");
+            if (response != null)
+            {
+                //response = GetDynamicValue("?xml", response);
+                //string status_code = GetDynamicValue("status_code", response);
+                //string message = GetDynamicValue("message", response);
+                //string code = GetDynamicValue("code", response);
+                //string type = GetDynamicValue("type", response);
+                string status_code = response.status_code;
+                string message = response.message;
+                string code = response.code;
+                string type = response.type;
+                Console.WriteLine(response);
+            }
+            else
+            {
+                Assert.Fail();
+            }
+        }
+
+        [TestMethod]
+        public async Task TestMethod3()
+        {
+            IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
+            dynamic response = await affirmAPI.AuthorizeAsync(publicKey, privateKey, "L52L1Z67YHJNG3HX", "123456789");
+            if (response != null)
+            {
+                //response = GetDynamicValue("?xml", response);
+                //string status_code = GetDynamicValue("status_code", response);
+                //string message = GetDynamicValue("message", response);
+                //string code = GetDynamicValue("code", response);
+                //string type = GetDynamicValue("type", response);
+                string status_code = response.status_code;
+                string message = response.message;
+                string code = response.code;
+                string type = response.type;
+                Console.WriteLine(response);
+            }
+            else
+            {
+                Assert.Fail();
             }
         }
     }

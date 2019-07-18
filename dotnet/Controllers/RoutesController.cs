@@ -2,6 +2,7 @@
 {
     using Affirm.Models;
     using Affirm.Services;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Newtonsoft.Json;
     using System;
@@ -24,9 +25,10 @@
         /// <returns></returns>
         public async Task<IActionResult> CreatePaymentAsync()
         {
+            string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
             var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             CreatePaymentRequest createPaymentRequest = JsonConvert.DeserializeObject<CreatePaymentRequest>(bodyAsText);
-            var paymentResponse = await this._affirmPaymentService.CreatePaymentAsync(createPaymentRequest);
+            var paymentResponse = await this._affirmPaymentService.CreatePaymentAsync(createPaymentRequest, publicKey);
 
             Response.Headers.Add("Cache-Control", "private");
 
@@ -39,13 +41,25 @@
         /// <param name="paymentId">VTEX payment ID from this payment</param>
         /// <param name="cancelPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<IActionResult> CancelPaymentAsync(string paymentId, [FromBody] CancelPaymentRequest cancelPaymentRequest)
+        public async Task<IActionResult> CancelPaymentAsync(string paymentId)
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
-            var cancelResponse = await this._affirmPaymentService.CancelPaymentAsync(cancelPaymentRequest, publicKey, privateKey);
+            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
 
-            return Json(cancelResponse);
+            var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+            CancelPaymentRequest cancelPaymentRequest = JsonConvert.DeserializeObject<CancelPaymentRequest>(bodyAsText);
+
+            if (string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(publicKey))
+            {
+                return BadRequest();
+            }
+            else
+            {
+                var cancelResponse = await this._affirmPaymentService.CancelPaymentAsync(cancelPaymentRequest, publicKey, privateKey, isLive);
+
+                return Json(cancelResponse);
+            }
         }
 
         /// <summary>
@@ -54,13 +68,25 @@
         /// <param name="paymentId">VTEX payment ID from this payment</param>
         /// <param name="capturePaymentRequest"></param>
         /// <returns></returns>
-        public async Task<IActionResult> CapturePaymentAsync(string paymentId, [FromBody] CapturePaymentRequest capturePaymentRequest)
+        public async Task<IActionResult> CapturePaymentAsync(string paymentId)
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
-            var captureResponse = await this._affirmPaymentService.CapturePaymentAsync(capturePaymentRequest, publicKey, privateKey);
+            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
 
-            return Json(captureResponse);
+            var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+            CapturePaymentRequest capturePaymentRequest = JsonConvert.DeserializeObject<CapturePaymentRequest>(bodyAsText);
+
+            if (string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(publicKey))
+            {
+                return BadRequest();
+            }
+            else
+            {
+                var captureResponse = await this._affirmPaymentService.CapturePaymentAsync(capturePaymentRequest, publicKey, privateKey, isLive);
+
+                return Json(captureResponse);
+            }
         }
 
         /// <summary>
@@ -69,23 +95,35 @@
         /// <param name="paymentId">VTEX payment ID from this payment</param>
         /// <param name="refundPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<IActionResult> RefundPaymentAsync(string paymentId, [FromBody] RefundPaymentRequest refundPaymentRequest)
+        public async Task<IActionResult> RefundPaymentAsync(string paymentId)
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
-            var refundResponse = await this._affirmPaymentService.RefundPaymentAsync(refundPaymentRequest, publicKey, privateKey);
+            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
 
-            return Json(refundResponse);
+            var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+            RefundPaymentRequest refundPaymentRequest = JsonConvert.DeserializeObject<RefundPaymentRequest>(bodyAsText);
+
+            if (string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(publicKey))
+            {
+                return BadRequest();
+            }
+            else
+            {
+                var refundResponse = await this._affirmPaymentService.RefundPaymentAsync(refundPaymentRequest, publicKey, privateKey, isLive);
+
+                return Json(refundResponse);
+            }
         }
 
         /// <summary>
-        /// 
+        /// Retrieve stored payment request
         /// </summary>
         /// <param name="paymentIdentifier">Payment GUID</param>
         /// <returns></returns>
         public async Task<IActionResult> GetPaymentRequestAsync(string paymentIdentifier)
         {
-            var paymentRequest = await this._affirmPaymentService.GetCreatePaymentRequest(paymentIdentifier);
+            var paymentRequest = await this._affirmPaymentService.GetCreatePaymentRequestAsync(paymentIdentifier);
 
             Response.Headers.Add("Cache-Control", "private");
 
@@ -93,7 +131,10 @@
         }
 
         /// <summary>
-        /// 
+        /// After completing the checkout flow and receiving the checkout token, authorize the charge.
+        /// Authorizing generates a charge ID that you’ll use to reference the charge moving forward.
+        /// You must authorize a charge to fully create it. A charge is not visible in the Read response,
+        /// nor in the merchant dashboard until you authorize it.
         /// </summary>
         /// <param name="paymentIdentifier">Payment GUID</param>
         /// <param name="token"></param>
@@ -102,11 +143,44 @@
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
-            var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentIdentifier, token, publicKey, privateKey);
+            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
 
-            Response.Headers.Add("Cache-Control", "private");
+            if (string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(publicKey))
+            {
+                return BadRequest();
+            }
+            else
+            {
+                var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentIdentifier, token, publicKey, privateKey, isLive);
+                Response.Headers.Add("Cache-Control", "private");
 
-            return Json(paymentRequest);
+                return Json(paymentRequest);
+            }
+        }
+
+        /// <summary>
+        /// Read the charge information, current charge status, and checkout data
+        /// </summary>
+        /// <param name="paymentIdentifier">Payment GUID</param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> ReadChargeAsync(string paymentId)
+        {
+            string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
+            string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
+            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
+
+            if (string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(publicKey))
+            {
+                return BadRequest();
+            }
+            else
+            {
+                var paymentRequest = await this._affirmPaymentService.ReadChargeAsync(paymentId, publicKey, privateKey, isLive);
+                Response.Headers.Add("Cache-Control", "private");
+
+                return Json(paymentRequest);
+            }
         }
 
         public string PrintHeaders()

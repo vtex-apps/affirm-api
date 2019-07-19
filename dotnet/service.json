@@ -39,12 +39,16 @@
     "authorizeAsync": {
       "path": "/affirm/payment-provider/payments/:paymentIdentifier/auth/:token",
       "public": true
+    },
+    "callbackAsync": {
+      "path": "/affirm/payment-provider/inbound/:action",
+      "public": true
     }
   },
   "events": {
     "onAppsLinked": {
       "sender": "apps",
-      "keys": ["linked"]
+      "keys": [ "linked" ]
     }
   }
 }

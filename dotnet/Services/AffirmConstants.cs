@@ -17,10 +17,16 @@ namespace Affirm.Services
         public const string Refund = "";
         public const string Update = "charges/{charge_id}/update";
 
-        public const string SuccessResponseCode = "auth";
+        public const string SuccessResponseCode = "authorized";
 
         public const string PrivateKeyHeader = "X-PROVIDER-API-AppToken";
         public const string PublicKeyHeader = "X-PROVIDER-API-AppKey";
         public const string IsProduction = "X-Vtex-Workspace-Is-Production";
+
+        public class Inbound
+        {
+            public const string ActionAuthorize = "auth";
+            public const string AcceptedResponse = "[accepted]";
+        }
     }
 }

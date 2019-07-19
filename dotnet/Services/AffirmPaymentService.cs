@@ -66,8 +66,8 @@
             {
                 paymentId = cancelPaymentRequest.paymentId,
                 cancellationId = affirmResponse.transaction_id,
-                code = affirmResponse.type,
-                message = affirmResponse.id,
+                code = affirmResponse.type ?? affirmResponse.Error.Code,
+                message = affirmResponse.id ?? affirmResponse.Error.Message,
                 requestId = cancelPaymentRequest.requestId
             };
 
@@ -89,8 +89,8 @@
                 paymentId = capturePaymentRequest.paymentId,
                 settleId = affirmResponse.transaction_id,
                 value = affirmResponse.amount == null ? 0m : affirmResponse.amount/100,
-                code = affirmResponse.type,
-                message = affirmResponse.id,
+                code = affirmResponse.type ?? affirmResponse.Error.Code,
+                message = affirmResponse.id ?? affirmResponse.Error.Message,
                 requestId = capturePaymentRequest.requestId
             };
 
@@ -114,8 +114,8 @@
                 paymentId = refundPaymentRequest.paymentId,
                 refundId = affirmResponse.transaction_id,
                 value = affirmResponse.amount == null ? 0m : affirmResponse.amount / 100,
-                code = affirmResponse.type,
-                message = affirmResponse.id,
+                code = affirmResponse.type ?? affirmResponse.Error.Code,
+                message = affirmResponse.id ?? affirmResponse.Error.Message,
                 requestId = refundPaymentRequest.requestId
             };
 
@@ -157,7 +157,7 @@
             CreatePaymentResponse paymentResponse = new CreatePaymentResponse();
             paymentResponse.paymentId = createPaymentRequest.paymentId;
             string paymentStatus = "denied";
-            if(affirmResponse.status == "authorized")
+            if(affirmResponse.status == AffirmConstants.SuccessResponseCode)
             {
                 paymentStatus = "approved";
             }
@@ -165,8 +165,8 @@
             paymentResponse.status = paymentStatus;
             paymentResponse.tid = affirmResponse.id;
             paymentResponse.authorizationId = affirmResponse.id;
-            paymentResponse.code = affirmResponse.status;
-            paymentResponse.message = affirmResponse.events;
+            paymentResponse.code = affirmResponse.status ?? affirmResponse.Error.Code;
+            paymentResponse.message = affirmResponse.events ?? affirmResponse.Error.Message;
 
             await this._paymentRequestRepository.PostCallbackResponse(createPaymentRequest, paymentResponse);
 

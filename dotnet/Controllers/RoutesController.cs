@@ -183,6 +183,74 @@
             }
         }
 
+        public async Task<IActionResult> CallbackAsync(string action)
+        {
+            string responseCode = string.Empty;
+            string responseMessage = string.Empty;
+            string responseStatusCode = string.Empty;
+            string responseBody = string.Empty;
+
+            string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
+            string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
+            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
+
+            var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+            InboundRequest inboundRequest = JsonConvert.DeserializeObject<InboundRequest>(bodyAsText);
+            dynamic inboundRequestBody = JsonConvert.DeserializeObject(inboundRequest.requestData.body);
+
+            string paymentId = inboundRequest.paymentId;
+            string requestId = inboundRequest.requestId;
+
+
+            if (string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(publicKey))
+            {
+                responseStatusCode = StatusCodes.Status400BadRequest.ToString();
+                responseMessage = "Missing keys.";
+            }
+            else
+            {
+                switch(action)
+                {
+                    case AffirmConstants.Inbound.ActionAuthorize:
+                        string token = inboundRequestBody.token;
+                        if (string.IsNullOrEmpty(paymentId) || string.IsNullOrEmpty(token))
+                        {
+                            responseStatusCode = StatusCodes.Status400BadRequest.ToString();
+                            responseMessage = "Missing parameters.";
+                        }
+                        else
+                        {
+                            var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentId, token, publicKey, privateKey, isLive);
+                            Response.Headers.Add("Cache-Control", "private");
+
+                            responseBody = JsonConvert.SerializeObject(paymentRequest);
+                            responseStatusCode = StatusCodes.Status200OK.ToString();
+                        }
+
+                        break;
+                    default:
+                        responseStatusCode = StatusCodes.Status405MethodNotAllowed.ToString();
+                        responseMessage = $"Action '{action}' is not supported.";
+                        break;
+                }
+            }
+
+            InboundResponse response = new InboundResponse
+            {
+                code = responseCode,
+                message = responseMessage,
+                paymentId = paymentId,
+                requestId = requestId,
+                responseData = new ResponseData
+                {
+                    body = responseBody,
+                    statusCode = responseStatusCode
+                }
+            };
+
+            return Json(response);
+        }
+
         public string PrintHeaders()
         {
             string headers = "--->>> Headers <<<---\n";

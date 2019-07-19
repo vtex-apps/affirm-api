@@ -217,7 +217,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}/update")
+                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}/void")
             };
 
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));

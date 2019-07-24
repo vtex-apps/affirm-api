@@ -261,7 +261,7 @@
                 }
             }
 
-            Console.WriteLine(parsedResponse);
+            Console.WriteLine($"Parsed Response = {parsedResponse}");
 
             return parsedResponse;
         }

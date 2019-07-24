@@ -183,8 +183,10 @@
             }
         }
 
-        public async Task<IActionResult> CallbackAsync(string action)
+        public async Task<IActionResult> InboundAsync(string actiontype)
         {
+            Console.WriteLine($"InboundAsync action = {actiontype}");
+
             string responseCode = string.Empty;
             string responseMessage = string.Empty;
             string responseStatusCode = string.Empty;
@@ -192,27 +194,39 @@
 
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
-            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
-
+            bool isLive = true;
+            Boolean.TryParse(HttpContext.Request.Headers[AffirmConstants.IsProduction], out isLive);
             var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             InboundRequest inboundRequest = JsonConvert.DeserializeObject<InboundRequest>(bodyAsText);
-            dynamic inboundRequestBody = JsonConvert.DeserializeObject(inboundRequest.requestData.body);
+            dynamic inboundRequestBody = null;
+            try
+            {
+                inboundRequestBody = JsonConvert.DeserializeObject(inboundRequest.requestData.body);
+            }
+            catch(Exception ex)
+            {
+                responseMessage = ex.Message;
+            }
 
             string paymentId = inboundRequest.paymentId;
             string requestId = inboundRequest.requestId;
 
-
-            if (string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(publicKey))
+            if(inboundRequestBody == null)
+            {
+                responseStatusCode = StatusCodes.Status400BadRequest.ToString();
+            }
+            else if (string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(publicKey))
             {
                 responseStatusCode = StatusCodes.Status400BadRequest.ToString();
                 responseMessage = "Missing keys.";
             }
             else
             {
-                switch(action)
+                switch(actiontype)
                 {
                     case AffirmConstants.Inbound.ActionAuthorize:
                         string token = inboundRequestBody.token;
+                        //string token = inboundRequest.requestData.body;
                         if (string.IsNullOrEmpty(paymentId) || string.IsNullOrEmpty(token))
                         {
                             responseStatusCode = StatusCodes.Status400BadRequest.ToString();
@@ -230,7 +244,7 @@
                         break;
                     default:
                         responseStatusCode = StatusCodes.Status405MethodNotAllowed.ToString();
-                        responseMessage = $"Action '{action}' is not supported.";
+                        responseMessage = $"Action '{actiontype}' is not supported.";
                         break;
                 }
             }

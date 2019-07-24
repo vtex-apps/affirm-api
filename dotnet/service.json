@@ -12,6 +12,10 @@
       "path": "/affirm/print-headers-priv",
       "public": false
     },
+    "inboundAsync": {
+      "path": "/affirm/payment-provider/inbound/:actiontype",
+      "public": true
+    },
     "paymentMethods": {
       "path": "/affirm/payment-provider/payment-methods",
       "public": true
@@ -40,8 +44,8 @@
       "path": "/affirm/payment-provider/payments/:paymentIdentifier/auth/:token",
       "public": true
     },
-    "callbackAsync": {
-      "path": "/affirm/payment-provider/inbound/:action",
+    "readChargeAsync": {
+      "path": "/affirm/payment-provider/payments/:paymentIdentifier/read",
       "public": true
     }
   },

@@ -149,26 +149,31 @@
         {
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.AuthorizeAsync(publicKey, privateKey, token, paymentIdentifier);
-            //int amount = affirmResponse.amount;
 
-            // Retrieve the original Payment Request from storage
-            CreatePaymentRequest createPaymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(paymentIdentifier);
-
-            CreatePaymentResponse paymentResponse = new CreatePaymentResponse();
-            paymentResponse.paymentId = createPaymentRequest.paymentId;
             string paymentStatus = "denied";
-            if(affirmResponse.status == AffirmConstants.SuccessResponseCode)
+            if (affirmResponse.status != null && affirmResponse.status == AffirmConstants.SuccessResponseCode)
             {
                 paymentStatus = "approved";
             }
 
+            CreatePaymentResponse paymentResponse = new CreatePaymentResponse();
+            paymentResponse.paymentId = paymentIdentifier;
             paymentResponse.status = paymentStatus;
-            paymentResponse.tid = affirmResponse.id;
-            paymentResponse.authorizationId = affirmResponse.id;
-            paymentResponse.code = affirmResponse.status ?? affirmResponse.Error.Code;
-            paymentResponse.message = affirmResponse.events ?? affirmResponse.Error.Message;
+            paymentResponse.tid = affirmResponse.id ?? null;
+            paymentResponse.authorizationId = affirmResponse.id ?? null;
+            paymentResponse.code = affirmResponse.status ?? affirmResponse.status_code ?? affirmResponse.Error?.Code;
+            paymentResponse.message = affirmResponse.events ?? affirmResponse.message ?? affirmResponse.Error?.Message;
 
-            await this._paymentRequestRepository.PostCallbackResponse(createPaymentRequest, paymentResponse);
+            // Retrieve the original Payment Request from storage
+            CreatePaymentRequest createPaymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(paymentIdentifier);
+            if (createPaymentRequest != null)
+            {
+                await this._paymentRequestRepository.PostCallbackResponse(createPaymentRequest, paymentResponse);   
+            }
+            else
+            {
+                Console.WriteLine($"Could not load request for '{paymentIdentifier}'");
+            }
 
             return paymentResponse;
         }

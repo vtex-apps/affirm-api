@@ -61,7 +61,7 @@
         public async Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey, bool isLive)
         {
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.paymentId);
+            dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
 
             CancelPaymentResponse cancelPaymentResponse = new CancelPaymentResponse
             {
@@ -83,7 +83,7 @@
         public async Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey, bool isLive)
         {
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.requestId, capturePaymentRequest.paymentId, string.Empty, string.Empty);
+            dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.transactionId, capturePaymentRequest.paymentId, string.Empty, string.Empty);
 
             CapturePaymentResponse capturePaymentResponse = new CapturePaymentResponse
             {

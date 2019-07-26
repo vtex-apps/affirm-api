@@ -13,7 +13,7 @@
       "public": false
     },
     "inboundAsync": {
-      "path": "/affirm/payment-provider/inbound/:actiontype",
+      "path": "/affirm/payment-provider/payments/:paymentId/inbound/:actiontype",
       "public": true
     },
     "paymentMethods": {

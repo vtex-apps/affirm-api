@@ -3,6 +3,7 @@
     using Affirm.Data;
     using Affirm.Models;
     using Microsoft.AspNetCore.Http;
+    using Newtonsoft.Json;
     using System;
     using System.Net.Http;
     using System.Threading.Tasks;
@@ -145,15 +146,28 @@
         /// <param name="publicKey"></param>
         /// <param name="privateKey"></param>
         /// <returns></returns>
-        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, bool isLive)
+        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, bool isLive, string callbackUrl, int amount)
         {
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.AuthorizeAsync(publicKey, privateKey, token, paymentIdentifier);
 
-            string paymentStatus = "denied";
-            if (affirmResponse.status != null && affirmResponse.status == AffirmConstants.SuccessResponseCode)
+            string paymentStatus = AffirmConstants.Vtex.Denied;
+            if (affirmResponse.amount != null && affirmResponse.amount == amount)
             {
-                paymentStatus = "approved";
+                paymentStatus = AffirmConstants.Vtex.Approved;
+            }
+            else if(affirmResponse.status_code != null && affirmResponse.status_code == StatusCodes.Status400BadRequest.ToString() && affirmResponse.code != null && affirmResponse.code == AffirmConstants.TokenUsed)
+            {
+                if (affirmResponse.charge_id != null)
+                {
+                    string chargeId = affirmResponse.charge_id;
+                    Console.WriteLine($"Getting current status for {chargeId}");
+                    affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, chargeId);
+                    if (affirmResponse.status != null && affirmResponse.status == AffirmConstants.SuccessResponseCode)
+                    {
+                        paymentStatus = AffirmConstants.Vtex.Approved;
+                    }
+                }
             }
 
             CreatePaymentResponse paymentResponse = new CreatePaymentResponse();
@@ -162,18 +176,23 @@
             paymentResponse.tid = affirmResponse.id ?? null;
             paymentResponse.authorizationId = affirmResponse.id ?? null;
             paymentResponse.code = affirmResponse.status ?? affirmResponse.status_code ?? affirmResponse.Error?.Code;
-            paymentResponse.message = affirmResponse.events ?? affirmResponse.message ?? affirmResponse.Error?.Message;
+            string message = string.Empty;
+            if(affirmResponse.events != null)
+            {
+                message = JsonConvert.SerializeObject(affirmResponse.events);
+            }
+            else if(affirmResponse.message != null)
+            {
+                message = affirmResponse.message;
+            }
+            else if (affirmResponse.Error != null && affirmResponse.Error.Message != null)
+            {
+                message = affirmResponse.Error.Message;
+            }
 
-            // Retrieve the original Payment Request from storage
-            CreatePaymentRequest createPaymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(paymentIdentifier);
-            if (createPaymentRequest != null)
-            {
-                await this._paymentRequestRepository.PostCallbackResponse(createPaymentRequest, paymentResponse);   
-            }
-            else
-            {
-                Console.WriteLine($"Could not load request for '{paymentIdentifier}'");
-            }
+            paymentResponse.message = message;
+
+            await this._paymentRequestRepository.PostCallbackResponse(callbackUrl, paymentResponse);
 
             return paymentResponse;
         }
@@ -182,6 +201,7 @@
         {
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, paymentId);
+            //dynamic affirmResponse = await affirmAPI.ReadAsync(publicKey, privateKey, paymentId);
 
             return affirmResponse;
         }

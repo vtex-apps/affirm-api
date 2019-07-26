@@ -49,7 +49,7 @@
             return Task.FromResult(merchantSettings);
         }
 
-        public Task PostCallbackResponse(CreatePaymentRequest createPaymentRequest, CreatePaymentResponse createPaymentResponse)
+        public Task PostCallbackResponse(string callbackUrl, CreatePaymentResponse createPaymentResponse)
         {
             return Task.CompletedTask;
         }

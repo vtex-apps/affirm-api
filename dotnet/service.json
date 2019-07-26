@@ -41,7 +41,7 @@
       "public": true
     },
     "authorizeAsync": {
-      "path": "/affirm/payment-provider/payments/:paymentIdentifier/auth/:token",
+      "path": "/affirm/payment-provider/payments/:paymentIdentifier/auth/:token/:callbackUrl/:orderTotal",
       "public": true
     },
     "readChargeAsync": {

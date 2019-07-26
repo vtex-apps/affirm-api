@@ -17,7 +17,7 @@
             throw new System.NotImplementedException();
         }
 
-        public Task PostCallbackResponse(CreatePaymentRequest createPaymentRequest, CreatePaymentResponse createPaymentResponse)
+        public Task PostCallbackResponse(string callbackUrl, CreatePaymentResponse createPaymentResponse)
         {
             throw new System.NotImplementedException();
         }

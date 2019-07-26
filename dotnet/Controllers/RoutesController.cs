@@ -139,7 +139,7 @@
         /// <param name="paymentIdentifier">Payment GUID</param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<IActionResult> AuthorizeAsync(string paymentIdentifier, string token)
+        public async Task<IActionResult> AuthorizeAsync(string paymentIdentifier, string token, string callbackUrl, int orderTotal)
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
@@ -151,7 +151,7 @@
             }
             else
             {
-                var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentIdentifier, token, publicKey, privateKey, isLive);
+                var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentIdentifier, token, publicKey, privateKey, isLive, callbackUrl, orderTotal);
                 Response.Headers.Add("Cache-Control", "private");
 
                 return Json(paymentRequest);
@@ -164,7 +164,7 @@
         /// <param name="paymentIdentifier">Payment GUID</param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<IActionResult> ReadChargeAsync(string paymentId)
+        public async Task<IActionResult> ReadChargeAsync(string paymentIdentifier)
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
@@ -176,7 +176,7 @@
             }
             else
             {
-                var paymentRequest = await this._affirmPaymentService.ReadChargeAsync(paymentId, publicKey, privateKey, isLive);
+                var paymentRequest = await this._affirmPaymentService.ReadChargeAsync(paymentIdentifier, publicKey, privateKey, isLive);
                 Response.Headers.Add("Cache-Control", "private");
 
                 return Json(paymentRequest);
@@ -226,15 +226,16 @@
                 {
                     case AffirmConstants.Inbound.ActionAuthorize:
                         string token = inboundRequestBody.token;
-                        //string token = inboundRequest.requestData.body;
-                        if (string.IsNullOrEmpty(paymentId) || string.IsNullOrEmpty(token))
+                        string callbackUrl = inboundRequestBody.callbackUrl;
+                        int amount = inboundRequestBody.orderTotal;
+                        if (string.IsNullOrEmpty(paymentId) || string.IsNullOrEmpty(token) || string.IsNullOrEmpty(callbackUrl))
                         {
                             responseStatusCode = StatusCodes.Status400BadRequest.ToString();
                             responseMessage = "Missing parameters.";
                         }
                         else
                         {
-                            var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentId, token, publicKey, privateKey, isLive);
+                            var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentId, token, publicKey, privateKey, isLive, callbackUrl, amount);
                             Response.Headers.Add("Cache-Control", "private");
 
                             responseBody = JsonConvert.SerializeObject(paymentRequest);

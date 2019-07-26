@@ -13,6 +13,6 @@
 
         Task<MerchantSettings> GetMerchantSettings();
 
-        Task PostCallbackResponse(CreatePaymentRequest createPaymentRequest, CreatePaymentResponse createPaymentResponse);
+        Task PostCallbackResponse(string callbackUrl, CreatePaymentResponse createPaymentResponse);
     }
 }

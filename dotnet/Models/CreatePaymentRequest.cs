@@ -73,6 +73,9 @@
         /// The URL you need to redirect the end user back to merchant's store when using the redirect flow
         /// </summary>
         public string returnUrl { get; set; }
+
+
+        public string inboundRequestsUrl { get; set; }
     }
 
     public class Expiration

@@ -106,7 +106,7 @@
         {
             var request = new HttpRequestMessage
             {
-                Method = HttpMethod.Get,
+                Method = HttpMethod.Post,
                 RequestUri = new Uri($"{affirmBaseUrl}/checkout/{checkoutId}")
             };
 
@@ -129,6 +129,8 @@
         /// <returns></returns>
         public async Task<JObject> ReadChargeAsync(string publicApiKey, string privateApiKey, string chargeId)
         {
+            Console.WriteLine($"Get to '{affirmBaseUrl}/charges/{chargeId}'");
+
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,

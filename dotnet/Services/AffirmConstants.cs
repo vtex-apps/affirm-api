@@ -18,6 +18,7 @@ namespace Affirm.Services
         public const string Update = "charges/{charge_id}/update";
 
         public const string SuccessResponseCode = "authorized";
+        public const string TokenUsed = "checkout-token-used";
 
         public const string PrivateKeyHeader = "X-PROVIDER-API-AppToken";
         public const string PublicKeyHeader = "X-PROVIDER-API-AppKey";
@@ -27,6 +28,13 @@ namespace Affirm.Services
         {
             public const string ActionAuthorize = "auth";
             public const string AcceptedResponse = "[accepted]";
+        }
+
+        public class Vtex
+        {
+            public const string Approved = "approved";
+            public const string Denied = "denied";
+
         }
     }
 }

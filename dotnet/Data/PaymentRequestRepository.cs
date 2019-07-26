@@ -152,29 +152,31 @@
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task PostCallbackResponse(CreatePaymentRequest createPaymentRequest, CreatePaymentResponse createPaymentResponse)
+        public async Task PostCallbackResponse(string callbackUrl, CreatePaymentResponse createPaymentResponse)
         {
-            var jsonSerializedPaymentResponse = JsonConvert.SerializeObject(createPaymentResponse);
-            var request = new HttpRequestMessage
-            {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(createPaymentRequest.callbackUrl),
-                Content = new StringContent(jsonSerializedPaymentResponse, Encoding.UTF8, APPLICATION_JSON)
-            };
-            
-            string authToken = this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL];
-            if (authToken != null)
-            {
-                request.Headers.Add(AUTHORIZATION_HEADER_NAME, authToken);
-            }
-
             HttpResponseMessage response = new HttpResponseMessage();
-            try {
+
+            try
+            {
+                var jsonSerializedPaymentResponse = JsonConvert.SerializeObject(createPaymentResponse);
+                var request = new HttpRequestMessage
+                {
+                    Method = HttpMethod.Post,
+                    RequestUri = new Uri(callbackUrl),
+                    Content = new StringContent(jsonSerializedPaymentResponse, Encoding.UTF8, APPLICATION_JSON)
+                };
+
+                string authToken = this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL];
+                if (authToken != null)
+                {
+                    request.Headers.Add(AUTHORIZATION_HEADER_NAME, authToken);
+                }
+
                 response = await _httpClient.SendAsync(request);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"PostCallbackResponse {createPaymentRequest.callbackUrl} Error: {ex.Message} InnerException: {ex.InnerException} StackTrace: {ex.StackTrace}");
+                Console.WriteLine($"PostCallbackResponse {callbackUrl} Error: {ex.Message} InnerException: {ex.InnerException} StackTrace: {ex.StackTrace}");
             }
 
             response.EnsureSuccessStatusCode();

@@ -156,6 +156,9 @@
         {
             HttpResponseMessage response = new HttpResponseMessage();
 
+            // Internal vtex posts must be to http with use https header
+            callbackUrl.Replace("https", "http");
+
             try
             {
                 var jsonSerializedPaymentResponse = JsonConvert.SerializeObject(createPaymentResponse);

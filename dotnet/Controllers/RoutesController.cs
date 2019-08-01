@@ -266,6 +266,13 @@
             return Json(response);
         }
 
+        public async Task<IActionResult> GetAppSettings()
+        {
+            VtexSettings paymentRequest = await this._affirmPaymentService.GetSettingsAsync();
+
+            return Json(paymentRequest);
+        }
+
         public string PrintHeaders()
         {
             string headers = "--->>> Headers <<<---\n";

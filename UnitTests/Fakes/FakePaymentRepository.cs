@@ -31,5 +31,10 @@
         {
             throw new System.NotImplementedException();
         }
+
+        public Task<VtexSettings> GetAppSettings()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

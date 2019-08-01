@@ -47,6 +47,10 @@
     "readChargeAsync": {
       "path": "/affirm/payment-provider/payments/:paymentIdentifier/read",
       "public": true
+    },
+    "getAppSettings": {
+      "path": "/affirm/payment-provider/payments/settings",
+      "public": true
     }
   },
   "events": {

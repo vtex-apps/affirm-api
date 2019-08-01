@@ -53,5 +53,10 @@
         {
             return Task.CompletedTask;
         }
+
+        public Task<VtexSettings> GetAppSettings()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -50,6 +50,32 @@
             string redirectUrl = "/affirm-payment";
             paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
 
+            // Load delay settings
+            VtexSettings vtexSettings = await this._paymentRequestRepository.GetAppSettings();
+            if (vtexSettings != null)
+            {
+                if (!string.IsNullOrEmpty(vtexSettings.delayInterval))
+                {
+                    int multiple = 1;
+                    switch (vtexSettings.delayInterval)
+                    {
+                        case "Minutes":
+                            multiple = 60;
+                            break;
+                        case "Hours":
+                            multiple = 60 * 60;
+                            break;
+                        case "Days":
+                            multiple = 60 * 60 * 24;
+                            break;
+                    }
+
+                    paymentResponse.delayToAutoSettle = vtexSettings.delayToAutoSettle * multiple;
+                    paymentResponse.delayToAutoSettleAfterAntifraud = vtexSettings.delayToAutoSettleAfterAntifraud * multiple;
+                    paymentResponse.delayToCancel = vtexSettings.delayToCancel * multiple;
+                }
+            }
+
             return paymentResponse;
         }
 
@@ -226,6 +252,13 @@
             //dynamic affirmResponse = await affirmAPI.ReadAsync(publicKey, privateKey, paymentId);
 
             return affirmResponse;
+        }
+
+        public async Task<VtexSettings> GetSettingsAsync()
+        {
+            VtexSettings settings = await this._paymentRequestRepository.GetAppSettings();
+
+            return settings;
         }
     }
 }

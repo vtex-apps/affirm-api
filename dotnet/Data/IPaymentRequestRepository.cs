@@ -14,5 +14,7 @@
         Task<MerchantSettings> GetMerchantSettings();
 
         Task PostCallbackResponse(string callbackUrl, CreatePaymentResponse createPaymentResponse);
+
+        Task<VtexSettings> GetAppSettings();
     }
 }

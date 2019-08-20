@@ -76,6 +76,8 @@
 
 
         public string inboundRequestsUrl { get; set; }
+
+        public string orderId { get; set; }
     }
 
     public class Expiration

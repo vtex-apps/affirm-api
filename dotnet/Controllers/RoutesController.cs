@@ -151,7 +151,7 @@
             }
             else
             {
-                var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentIdentifier, token, publicKey, privateKey, isLive, callbackUrl, orderTotal);
+                var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentIdentifier, token, publicKey, privateKey, isLive, callbackUrl, orderTotal, string.Empty);
                 Response.Headers.Add("Cache-Control", "private");
 
                 return Json(paymentRequest);
@@ -228,6 +228,7 @@
                         string token = inboundRequestBody.token;
                         string callbackUrl = inboundRequestBody.callbackUrl;
                         int amount = inboundRequestBody.orderTotal;
+                        string orderId = inboundRequestBody.orderId;
                         if (string.IsNullOrEmpty(paymentId) || string.IsNullOrEmpty(token) || string.IsNullOrEmpty(callbackUrl))
                         {
                             responseStatusCode = StatusCodes.Status400BadRequest.ToString();
@@ -235,7 +236,7 @@
                         }
                         else
                         {
-                            var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentId, token, publicKey, privateKey, isLive, callbackUrl, amount);
+                            var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentId, token, publicKey, privateKey, isLive, callbackUrl, amount, orderId);
                             Response.Headers.Add("Cache-Control", "private");
 
                             responseBody = JsonConvert.SerializeObject(paymentRequest);

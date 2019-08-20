@@ -108,15 +108,17 @@
         /// <returns></returns>
         public async Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey, bool isLive)
         {
+            // Load request from storage for order id
+            CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(capturePaymentRequest.paymentId);
+
             if (capturePaymentRequest.authorizationId == null)
             {
                 // Get Affirm id from storage
-                CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(capturePaymentRequest.paymentId);
                 capturePaymentRequest.authorizationId = paymentRequest.transactionId;
             }
 
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, capturePaymentRequest.paymentId, string.Empty, string.Empty);
+            dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId, string.Empty, string.Empty);
 
             CapturePaymentResponse capturePaymentResponse = new CapturePaymentResponse
             {
@@ -186,10 +188,18 @@
         /// <param name="publicKey"></param>
         /// <param name="privateKey"></param>
         /// <returns></returns>
-        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, bool isLive, string callbackUrl, int amount)
+        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, bool isLive, string callbackUrl, int amount, string orderId)
         {
+            CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(paymentIdentifier);
+
+            if (string.IsNullOrEmpty(orderId))
+            {
+                // Load request from storage for order id
+                orderId = paymentRequest.orderId;
+            }
+
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            dynamic affirmResponse = await affirmAPI.AuthorizeAsync(publicKey, privateKey, token, paymentIdentifier);
+            dynamic affirmResponse = await affirmAPI.AuthorizeAsync(publicKey, privateKey, token, orderId);
 
             string paymentStatus = AffirmConstants.Vtex.Denied;
             if (affirmResponse.amount != null && affirmResponse.amount == amount)
@@ -235,10 +245,7 @@
             await this._paymentRequestRepository.PostCallbackResponse(callbackUrl, paymentResponse);
 
             // Save the Affirm id - will need for capture
-            CreatePaymentRequest paymentRequest = new CreatePaymentRequest
-            {
-                transactionId = affirmResponse.id
-            };
+            paymentRequest.transactionId = affirmResponse.id;
 
             await this._paymentRequestRepository.SavePaymentRequestAsync(paymentIdentifier, paymentRequest);
 

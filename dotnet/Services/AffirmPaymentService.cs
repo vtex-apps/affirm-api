@@ -190,12 +190,9 @@
         /// <returns></returns>
         public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, bool isLive, string callbackUrl, int amount, string orderId)
         {
-            CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(paymentIdentifier);
-
             if (string.IsNullOrEmpty(orderId))
             {
-                // Load request from storage for order id
-                orderId = paymentRequest.orderId;
+                orderId = paymentIdentifier;
             }
 
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
@@ -206,7 +203,7 @@
             {
                 paymentStatus = AffirmConstants.Vtex.Approved;
             }
-            else if(affirmResponse.status_code != null && affirmResponse.status_code == StatusCodes.Status400BadRequest.ToString() && affirmResponse.code != null && affirmResponse.code == AffirmConstants.TokenUsed)
+            else if (affirmResponse.status_code != null && affirmResponse.status_code == StatusCodes.Status400BadRequest.ToString() && affirmResponse.code != null && affirmResponse.code == AffirmConstants.TokenUsed)
             {
                 if (affirmResponse.charge_id != null)
                 {
@@ -227,11 +224,11 @@
             paymentResponse.authorizationId = affirmResponse.id ?? null;
             paymentResponse.code = affirmResponse.status ?? affirmResponse.status_code ?? affirmResponse.Error?.Code;
             string message = string.Empty;
-            if(affirmResponse.events != null)
+            if (affirmResponse.events != null)
             {
                 message = JsonConvert.SerializeObject(affirmResponse.events);
             }
-            else if(affirmResponse.message != null)
+            else if (affirmResponse.message != null)
             {
                 message = affirmResponse.message;
             }
@@ -244,8 +241,12 @@
 
             await this._paymentRequestRepository.PostCallbackResponse(callbackUrl, paymentResponse);
 
-            // Save the Affirm id - will need for capture
-            paymentRequest.transactionId = affirmResponse.id;
+            // Save the Affirm id & order number - will need for capture
+            CreatePaymentRequest paymentRequest = new CreatePaymentRequest
+            {
+                transactionId = affirmResponse.id,
+                orderId = orderId
+            };
 
             await this._paymentRequestRepository.SavePaymentRequestAsync(paymentIdentifier, paymentRequest);
 

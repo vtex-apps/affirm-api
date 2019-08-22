@@ -84,8 +84,9 @@
         /// </summary>
         /// <param name="cancelPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey, bool isLive)
+        public async Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey)
         {
+            bool isLive = await this.GetIsLiveSetting();
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
 
@@ -106,8 +107,10 @@
         /// </summary>
         /// <param name="capturePaymentRequest"></param>
         /// <returns></returns>
-        public async Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey, bool isLive)
+        public async Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey)
         {
+            bool isLive = await this.GetIsLiveSetting();
+
             // Load request from storage for order id
             CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(capturePaymentRequest.paymentId);
 
@@ -138,8 +141,10 @@
         /// </summary>
         /// <param name="refundPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<RefundPaymentResponse> RefundPaymentAsync(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey, bool isLive)
+        public async Task<RefundPaymentResponse> RefundPaymentAsync(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey)
         {
+            bool isLive = await this.GetIsLiveSetting();
+
             if (refundPaymentRequest.authorizationId == null)
             {
                 // Get Affirm id from storage
@@ -188,8 +193,10 @@
         /// <param name="publicKey"></param>
         /// <param name="privateKey"></param>
         /// <returns></returns>
-        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, bool isLive, string callbackUrl, int amount, string orderId)
+        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId)
         {
+            bool isLive = await this.GetIsLiveSetting();
+
             if (string.IsNullOrEmpty(orderId))
             {
                 orderId = paymentIdentifier;
@@ -253,8 +260,9 @@
             return paymentResponse;
         }
 
-        public async Task<object> ReadChargeAsync(string paymentId, string publicKey, string privateKey, bool isLive)
+        public async Task<object> ReadChargeAsync(string paymentId, string publicKey, string privateKey)
         {
+            bool isLive = await this.GetIsLiveSetting();
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, paymentId);
             //dynamic affirmResponse = await affirmAPI.ReadAsync(publicKey, privateKey, paymentId);
@@ -267,6 +275,18 @@
             VtexSettings settings = await this._paymentRequestRepository.GetAppSettings();
 
             return settings;
+        }
+
+        private async Task<bool> GetIsLiveSetting()
+        {
+            bool retval = true;
+            VtexSettings vtexSettings = await this._paymentRequestRepository.GetAppSettings();
+            if (vtexSettings != null)
+            {
+                retval = vtexSettings.isLive;
+            }
+
+            return retval;
         }
     }
 }

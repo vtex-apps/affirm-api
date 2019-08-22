@@ -45,7 +45,6 @@
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
-            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
 
             var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             CancelPaymentRequest cancelPaymentRequest = JsonConvert.DeserializeObject<CancelPaymentRequest>(bodyAsText);
@@ -56,7 +55,7 @@
             }
             else
             {
-                var cancelResponse = await this._affirmPaymentService.CancelPaymentAsync(cancelPaymentRequest, publicKey, privateKey, isLive);
+                var cancelResponse = await this._affirmPaymentService.CancelPaymentAsync(cancelPaymentRequest, publicKey, privateKey);
 
                 return Json(cancelResponse);
             }
@@ -72,7 +71,6 @@
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
-            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
 
             var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             CapturePaymentRequest capturePaymentRequest = JsonConvert.DeserializeObject<CapturePaymentRequest>(bodyAsText);
@@ -83,7 +81,7 @@
             }
             else
             {
-                var captureResponse = await this._affirmPaymentService.CapturePaymentAsync(capturePaymentRequest, publicKey, privateKey, isLive);
+                var captureResponse = await this._affirmPaymentService.CapturePaymentAsync(capturePaymentRequest, publicKey, privateKey);
 
                 return Json(captureResponse);
             }
@@ -99,7 +97,6 @@
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
-            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
 
             var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             RefundPaymentRequest refundPaymentRequest = JsonConvert.DeserializeObject<RefundPaymentRequest>(bodyAsText);
@@ -110,7 +107,7 @@
             }
             else
             {
-                var refundResponse = await this._affirmPaymentService.RefundPaymentAsync(refundPaymentRequest, publicKey, privateKey, isLive);
+                var refundResponse = await this._affirmPaymentService.RefundPaymentAsync(refundPaymentRequest, publicKey, privateKey);
 
                 return Json(refundResponse);
             }
@@ -143,7 +140,6 @@
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
-            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
 
             if (string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(publicKey))
             {
@@ -151,7 +147,7 @@
             }
             else
             {
-                var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentIdentifier, token, publicKey, privateKey, isLive, callbackUrl, orderTotal, string.Empty);
+                var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentIdentifier, token, publicKey, privateKey, callbackUrl, orderTotal, string.Empty);
                 Response.Headers.Add("Cache-Control", "private");
 
                 return Json(paymentRequest);
@@ -168,7 +164,6 @@
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
-            bool isLive = Boolean.Parse(HttpContext.Request.Headers[AffirmConstants.IsProduction]);
 
             if (string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(publicKey))
             {
@@ -176,7 +171,7 @@
             }
             else
             {
-                var paymentRequest = await this._affirmPaymentService.ReadChargeAsync(paymentIdentifier, publicKey, privateKey, isLive);
+                var paymentRequest = await this._affirmPaymentService.ReadChargeAsync(paymentIdentifier, publicKey, privateKey);
                 Response.Headers.Add("Cache-Control", "private");
 
                 return Json(paymentRequest);
@@ -194,8 +189,6 @@
 
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
-            bool isLive = true;
-            Boolean.TryParse(HttpContext.Request.Headers[AffirmConstants.IsProduction], out isLive);
             var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             InboundRequest inboundRequest = JsonConvert.DeserializeObject<InboundRequest>(bodyAsText);
             dynamic inboundRequestBody = null;
@@ -236,7 +229,7 @@
                         }
                         else
                         {
-                            var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentId, token, publicKey, privateKey, isLive, callbackUrl, amount, orderId);
+                            var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentId, token, publicKey, privateKey, callbackUrl, amount, orderId);
                             Response.Headers.Add("Cache-Control", "private");
 
                             responseBody = JsonConvert.SerializeObject(paymentRequest);

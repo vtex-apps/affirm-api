@@ -96,7 +96,7 @@
             CancelPaymentResponse cancelPaymentResponse = new CancelPaymentResponse
             {
                 paymentId = cancelPaymentRequest.paymentId,
-                cancellationId = affirmResponse.transaction_id ?? Guid.NewGuid(),
+                cancellationId = affirmResponse.transaction_id ?? Guid.NewGuid().ToString(),
                 code = affirmResponse.type ?? affirmResponse.Error.Code,
                 message = affirmResponse.id ?? affirmResponse.Error.Message,
                 requestId = cancelPaymentRequest.requestId

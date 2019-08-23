@@ -106,7 +106,7 @@
         {
             var request = new HttpRequestMessage
             {
-                Method = HttpMethod.Post,
+                Method = HttpMethod.Get,
                 RequestUri = new Uri($"{affirmBaseUrl}/checkout/{checkoutId}")
             };
 

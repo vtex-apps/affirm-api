@@ -49,12 +49,12 @@
 
         public async Task<CreatePaymentRequest> GetPaymentRequestAsync(string paymentIdentifier)
         {
-            Console.WriteLine($"GetPaymentRequestAsync called with {this._environmentVariableProvider.Account},{this._environmentVariableProvider.Workspace},{this._environmentVariableProvider.ApplicationName},{this._environmentVariableProvider.ApplicationVendor},{this._environmentVariableProvider.Region}");
+            Console.WriteLine($"GetPaymentRequestAsync called with {this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_ACCOUNT]},master,{this._environmentVariableProvider.ApplicationName},{this._environmentVariableProvider.ApplicationVendor},{this._environmentVariableProvider.Region}");
 
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"http://vbase.{this._environmentVariableProvider.Region}.vtex.io/{this._environmentVariableProvider.Account}/{this._environmentVariableProvider.Workspace}/buckets/{this._applicationName}/{BUCKET}/files/{paymentIdentifier}"),
+                RequestUri = new Uri($"http://vbase.{this._environmentVariableProvider.Region}.vtex.io/{this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_ACCOUNT]}/master/buckets/{this._applicationName}/{BUCKET}/files/{paymentIdentifier}"),
             };
 
             string authToken = this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL];
@@ -89,7 +89,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Put,
-                RequestUri = new Uri($"http://vbase.{this._environmentVariableProvider.Region}.vtex.io/{this._environmentVariableProvider.Account}/{this._environmentVariableProvider.Workspace}/buckets/{this._applicationName}/{BUCKET}/files/{paymentIdentifier}"),
+                RequestUri = new Uri($"http://vbase.{this._environmentVariableProvider.Region}.vtex.io/{this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_ACCOUNT]}/master/buckets/{this._applicationName}/{BUCKET}/files/{paymentIdentifier}"),
                 Content = new StringContent(jsonSerializedCreatePaymentRequest, Encoding.UTF8, APPLICATION_JSON)
             };
 

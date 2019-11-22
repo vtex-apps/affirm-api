@@ -158,7 +158,7 @@
             int amount = decimal.ToInt32(refundPaymentRequest.value * 100);
 
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            dynamic affirmResponse = await affirmAPI.RefundAsync(publicKey, privateKey, refundPaymentRequest.requestId, amount);
+            dynamic affirmResponse = await affirmAPI.RefundAsync(publicKey, privateKey, refundPaymentRequest.authorizationId, amount);
 
             RefundPaymentResponse refundPaymentResponse = new RefundPaymentResponse
             {

@@ -86,21 +86,36 @@
         /// <returns></returns>
         public async Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey)
         {
-            bool isLive = await this.GetIsLiveSetting();
-            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
-
-            // If affirmResponse.transaction_id is null, assume the payment was never authorized.
-            // TODO: Make a call to 'Read' to get token status.
-            // This will require storing and loading the token from vbase.
-            CancelPaymentResponse cancelPaymentResponse = new CancelPaymentResponse
+            CancelPaymentResponse cancelPaymentResponse = null;
+            if (!string.IsNullOrEmpty(cancelPaymentRequest.authorizationId))
             {
-                paymentId = cancelPaymentRequest.paymentId,
-                cancellationId = affirmResponse.transaction_id ?? Guid.NewGuid().ToString(),
-                code = affirmResponse.type ?? affirmResponse.Error.Code,
-                message = affirmResponse.id ?? affirmResponse.Error.Message,
-                requestId = cancelPaymentRequest.requestId
-            };
+                bool isLive = await this.GetIsLiveSetting();
+                IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+                dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
+
+                // If affirmResponse.transaction_id is null, assume the payment was never authorized.
+                // TODO: Make a call to 'Read' to get token status.
+                // This will require storing and loading the token from vbase.
+                cancelPaymentResponse = new CancelPaymentResponse
+                {
+                    paymentId = cancelPaymentRequest.paymentId,
+                    cancellationId = affirmResponse.transaction_id ?? Guid.NewGuid().ToString(),
+                    code = affirmResponse.type ?? affirmResponse.Error.Code,
+                    message = affirmResponse.id ?? affirmResponse.Error.Message,
+                    requestId = cancelPaymentRequest.requestId
+                };
+            }
+            else
+            {
+                cancelPaymentResponse = new CancelPaymentResponse
+                {
+                    paymentId = cancelPaymentRequest.paymentId,
+                    cancellationId = Guid.NewGuid().ToString(),
+                    code = null,
+                    message = null,
+                    requestId = cancelPaymentRequest.requestId
+                };
+            }
 
             return cancelPaymentResponse;
         }

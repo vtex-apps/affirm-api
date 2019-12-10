@@ -145,9 +145,9 @@
             {
                 paymentId = capturePaymentRequest.paymentId,
                 settleId = affirmResponse.transaction_id,
-                value = affirmResponse.amount == null ? 0m : affirmResponse.amount/100,
+                value = affirmResponse.amount == null ? 0m : affirmResponse.amount / 100,
                 code = affirmResponse.type ?? affirmResponse.Error.Code,
-                message = affirmResponse.id ?? affirmResponse.Error.Message,
+                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee > 0 ? affirmResponse.fee / 100 : 0)}" : affirmResponse.Error.Message,
                 requestId = capturePaymentRequest.requestId
             };
 
@@ -181,7 +181,7 @@
                 refundId = affirmResponse.transaction_id,
                 value = affirmResponse.amount == null ? 0m : affirmResponse.amount / 100,
                 code = affirmResponse.type ?? affirmResponse.Error.Code,
-                message = affirmResponse.id ?? affirmResponse.Error.Message,
+                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee_refunded > 0 ? affirmResponse.fee_refunded / 100 : 0)}" : affirmResponse.Error.Message,
                 requestId = refundPaymentRequest.requestId
             };
 

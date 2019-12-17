@@ -145,9 +145,9 @@
             {
                 paymentId = capturePaymentRequest.paymentId,
                 settleId = affirmResponse.transaction_id,
-                value = affirmResponse.amount == null ? 0m : affirmResponse.amount / 100,
+                value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
                 code = affirmResponse.type ?? affirmResponse.Error.Code,
-                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee > 0 ? affirmResponse.fee / 100 : 0):F2}" : affirmResponse.Error.Message,
+                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee > 0 ? (decimal)affirmResponse.fee / 100m : 0):F2}" : affirmResponse.Error.Message,
                 requestId = capturePaymentRequest.requestId
             };
 
@@ -179,9 +179,9 @@
             {
                 paymentId = refundPaymentRequest.paymentId,
                 refundId = affirmResponse.transaction_id,
-                value = affirmResponse.amount == null ? 0m : affirmResponse.amount / 100,
+                value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
                 code = affirmResponse.type ?? affirmResponse.Error.Code,
-                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee_refunded > 0 ? affirmResponse.fee_refunded / 100 : 0):F2}" : affirmResponse.Error.Message,
+                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee_refunded > 0 ? (decimal)affirmResponse.fee_refunded / 100m : 0):F2}" : affirmResponse.Error.Message,
                 requestId = refundPaymentRequest.requestId
             };
 

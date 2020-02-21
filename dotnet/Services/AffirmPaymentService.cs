@@ -74,6 +74,8 @@
                     paymentResponse.delayToAutoSettleAfterAntifraud = vtexSettings.delayToAutoSettleAfterAntifraud * multiple;
                     paymentResponse.delayToCancel = vtexSettings.delayToCancel * multiple;
                 }
+
+                paymentResponse.paymentUrl = $"{redirectUrl}{vtexSettings.siteHostSuffix}?g={paymentIdentifier}&k={publicKey}";
             }
 
             return paymentResponse;
@@ -86,21 +88,36 @@
         /// <returns></returns>
         public async Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey)
         {
-            bool isLive = await this.GetIsLiveSetting();
-            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
-
-            // If affirmResponse.transaction_id is null, assume the payment was never authorized.
-            // TODO: Make a call to 'Read' to get token status.
-            // This will require storing and loading the token from vbase.
-            CancelPaymentResponse cancelPaymentResponse = new CancelPaymentResponse
+            CancelPaymentResponse cancelPaymentResponse = null;
+            if (!string.IsNullOrEmpty(cancelPaymentRequest.authorizationId))
             {
-                paymentId = cancelPaymentRequest.paymentId,
-                cancellationId = affirmResponse.transaction_id ?? Guid.NewGuid().ToString(),
-                code = affirmResponse.type ?? affirmResponse.Error.Code,
-                message = affirmResponse.id ?? affirmResponse.Error.Message,
-                requestId = cancelPaymentRequest.requestId
-            };
+                bool isLive = await this.GetIsLiveSetting();
+                IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+                dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
+
+                // If affirmResponse.transaction_id is null, assume the payment was never authorized.
+                // TODO: Make a call to 'Read' to get token status.
+                // This will require storing and loading the token from vbase.
+                cancelPaymentResponse = new CancelPaymentResponse
+                {
+                    paymentId = cancelPaymentRequest.paymentId,
+                    cancellationId = affirmResponse.transaction_id ?? Guid.NewGuid().ToString(),
+                    code = affirmResponse.type ?? affirmResponse.Error.Code,
+                    message = affirmResponse.id ?? affirmResponse.Error.Message,
+                    requestId = cancelPaymentRequest.requestId
+                };
+            }
+            else
+            {
+                cancelPaymentResponse = new CancelPaymentResponse
+                {
+                    paymentId = cancelPaymentRequest.paymentId,
+                    cancellationId = Guid.NewGuid().ToString(),
+                    code = null,
+                    message = null,
+                    requestId = cancelPaymentRequest.requestId
+                };
+            }
 
             return cancelPaymentResponse;
         }
@@ -130,9 +147,9 @@
             {
                 paymentId = capturePaymentRequest.paymentId,
                 settleId = affirmResponse.transaction_id,
-                value = affirmResponse.amount == null ? 0m : affirmResponse.amount/100,
+                value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
                 code = affirmResponse.type ?? affirmResponse.Error.Code,
-                message = affirmResponse.id ?? affirmResponse.Error.Message,
+                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee > 0 ? (decimal)affirmResponse.fee / 100m : 0):F2}" : affirmResponse.Error.Message,
                 requestId = capturePaymentRequest.requestId
             };
 
@@ -158,15 +175,15 @@
             int amount = decimal.ToInt32(refundPaymentRequest.value * 100);
 
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            dynamic affirmResponse = await affirmAPI.RefundAsync(publicKey, privateKey, refundPaymentRequest.requestId, amount);
+            dynamic affirmResponse = await affirmAPI.RefundAsync(publicKey, privateKey, refundPaymentRequest.authorizationId, amount);
 
             RefundPaymentResponse refundPaymentResponse = new RefundPaymentResponse
             {
                 paymentId = refundPaymentRequest.paymentId,
                 refundId = affirmResponse.transaction_id,
-                value = affirmResponse.amount == null ? 0m : affirmResponse.amount / 100,
+                value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
                 code = affirmResponse.type ?? affirmResponse.Error.Code,
-                message = affirmResponse.id ?? affirmResponse.Error.Message,
+                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee_refunded > 0 ? (decimal)affirmResponse.fee_refunded / 100m : 0):F2}" : affirmResponse.Error.Message,
                 requestId = refundPaymentRequest.requestId
             };
 
@@ -263,7 +280,7 @@
             return paymentResponse;
         }
 
-        public async Task<object> ReadChargeAsync(string paymentId, string publicKey, string privateKey)
+        public async Task<CreatePaymentResponse> ReadChargeAsync(string paymentId, string publicKey, string privateKey)
         {
             bool isLive = await this.GetIsLiveSetting();
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);

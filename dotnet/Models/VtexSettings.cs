@@ -13,5 +13,6 @@
         public int delayToAutoSettleAfterAntifraud { get; set; }
         public int delayToCancel { get; set; }
         public string delayInterval { get; set; }
+        public string siteHostSuffix { get; set; }
     }
 }

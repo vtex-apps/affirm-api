@@ -75,7 +75,7 @@
                     paymentResponse.delayToCancel = vtexSettings.delayToCancel * multiple;
                 }
 
-                paymentResponse.paymentUrl = $"{redirectUrl}{vtexSettings.siteHostSuffix}?g={paymentIdentifier}&k={publicKey}";
+                paymentResponse.paymentUrl = $"{vtexSettings.siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
             }
 
             return paymentResponse;

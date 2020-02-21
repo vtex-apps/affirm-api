@@ -17,7 +17,7 @@
 
         Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId);
 
-        Task<object> ReadChargeAsync(string paymentId, string publicKey, string privateKey);
+        Task<CreatePaymentResponse> ReadChargeAsync(string paymentId, string publicKey, string privateKey);
 
         Task<VtexSettings> GetSettingsAsync();
     }

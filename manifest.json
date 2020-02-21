@@ -1,7 +1,7 @@
 {
   "name": "affirm-api",
   "vendor": "vtex",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "title": "Affirm",
   "description": "An implementation of Affirm",
   "categories": [],
@@ -46,7 +46,7 @@
         "path": "/api/*"
       }
     },
-	{
+    {
       "name": "outbound-access",
       "attrs": {
         "host": "sandbox.affirm.com",

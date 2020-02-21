@@ -74,6 +74,8 @@
                     paymentResponse.delayToAutoSettleAfterAntifraud = vtexSettings.delayToAutoSettleAfterAntifraud * multiple;
                     paymentResponse.delayToCancel = vtexSettings.delayToCancel * multiple;
                 }
+
+                paymentResponse.paymentUrl = $"{redirectUrl}{vtexSettings.siteHostSuffix}?g={paymentIdentifier}&k={publicKey}";
             }
 
             return paymentResponse;
@@ -278,7 +280,7 @@
             return paymentResponse;
         }
 
-        public async Task<object> ReadChargeAsync(string paymentId, string publicKey, string privateKey)
+        public async Task<CreatePaymentResponse> ReadChargeAsync(string paymentId, string publicKey, string privateKey)
         {
             bool isLive = await this.GetIsLiveSetting();
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);

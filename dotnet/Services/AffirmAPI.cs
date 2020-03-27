@@ -23,7 +23,7 @@
             this._httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             this._httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             string prefix = isLive ? "api" : "sandbox";
-            this.affirmBaseUrl = $"http://{prefix}.affirm.com/api/v2";
+            this.affirmBaseUrl = $"http://{prefix}.{AffirmConstants.AffirmUrlStub}/{AffirmConstants.AffirmApiVersion}";
         }
 
         /// <summary>
@@ -48,7 +48,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"{affirmBaseUrl}/charges"),
+                RequestUri = new Uri($"{affirmBaseUrl}/{AffirmConstants.Transactions}"),
                 Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
             };
 
@@ -83,7 +83,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}/capture"),
+                RequestUri = new Uri($"{affirmBaseUrl}/{AffirmConstants.Transactions}/{chargeId}/{AffirmConstants.Capture}"),
                 Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
             };
 
@@ -121,7 +121,7 @@
         }
 
         /// <summary>
-        /// Read the charge information, current charge status, and checkout data for one or more charges.
+        /// Read the charge information, current charge status, and checkout data for one or more {AffirmConstants.Transactions}.
         /// This is useful for updating your records or order management system with current charge states
         /// before performing actions on them. It also allows you to keep your system in sync with Affirm
         /// if your staff manually manages loans in the merchant dashboard.
@@ -129,12 +129,12 @@
         /// <returns></returns>
         public async Task<JObject> ReadChargeAsync(string publicApiKey, string privateApiKey, string chargeId)
         {
-            Console.WriteLine($"Get to '{affirmBaseUrl}/charges/{chargeId}'");
+            //Console.WriteLine($"Get to '{affirmBaseUrl}/{AffirmConstants.Transactions}/{chargeId}'");
 
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}")
+                RequestUri = new Uri($"{affirmBaseUrl}/{AffirmConstants.Transactions}/{chargeId}")
             };
 
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
@@ -162,7 +162,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}/refund"),
+                RequestUri = new Uri($"{affirmBaseUrl}/{AffirmConstants.Transactions}/{chargeId}/{AffirmConstants.Refund}"),
                 Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
             };
 
@@ -194,7 +194,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}/update"),
+                RequestUri = new Uri($"{affirmBaseUrl}/{AffirmConstants.Transactions}/{chargeId}/{AffirmConstants.Update}"),
                 Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
             };
 
@@ -219,7 +219,7 @@
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri($"{affirmBaseUrl}/charges/{chargeId}/void")
+                RequestUri = new Uri($"{affirmBaseUrl}/{AffirmConstants.Transactions}/{chargeId}/{AffirmConstants.Void}")
             };
 
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));

@@ -48,7 +48,15 @@
             paymentResponse.status = "undefined";
             // paymentResponse.tid = createPaymentRequest.reference; // Using reference because we don't have an identifier from the provider yet.
             string redirectUrl = "/affirm-payment";
-            paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
+            //paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
+            // x-vtex-root-path
+            string siteHostSuffix = _httpContextAccessor.HttpContext.Request.Headers["x-vtex-root-path"].ToString();
+            if(!string.IsNullOrEmpty(siteHostSuffix))
+            {
+                Console.WriteLine($"Setting Root Path as {siteHostSuffix}");
+            }
+
+            paymentResponse.paymentUrl = $"{siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
 
             // Load delay settings
             VtexSettings vtexSettings = await this._paymentRequestRepository.GetAppSettings();
@@ -75,7 +83,7 @@
                     paymentResponse.delayToCancel = vtexSettings.delayToCancel * multiple;
                 }
 
-                paymentResponse.paymentUrl = $"{vtexSettings.siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
+                //paymentResponse.paymentUrl = $"{vtexSettings.siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
             }
 
             return paymentResponse;

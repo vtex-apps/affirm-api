@@ -46,7 +46,8 @@
             //paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
             paymentResponse.paymentAppData = new PaymentAppData
             {
-                appName = AffirmConstants.PaymentFlowAppName
+                appName = AffirmConstants.PaymentFlowAppName,
+                payload = JsonConvert.SerializeObject(new Payload { inboundRequestsUrl = createPaymentRequest.inboundRequestsUrl, callbackUrl = createPaymentRequest.callbackUrl})
             };
 
             // Load delay settings

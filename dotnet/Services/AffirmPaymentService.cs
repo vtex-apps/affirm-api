@@ -49,8 +49,8 @@
                 appName = AffirmConstants.PaymentFlowAppName,
                 payload = JsonConvert.SerializeObject(new Payload
                 {
-                    inboundRequestsUrl = createPaymentRequest.inboundRequestsUrl,
-                    callbackUrl = createPaymentRequest.callbackUrl,
+                    //inboundRequestsUrl = createPaymentRequest.inboundRequestsUrl,
+                    //callbackUrl = createPaymentRequest.callbackUrl,
                     paymentIdentifier = paymentIdentifier,
                     publicKey = publicKey
                 })
@@ -95,7 +95,7 @@
             //    //}
             //}
 
-            paymentResponse.paymentUrl = $"{siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
+            //paymentResponse.paymentUrl = $"{siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
 
             return paymentResponse;
         }

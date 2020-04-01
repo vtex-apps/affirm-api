@@ -26,12 +26,6 @@
                                throw new ArgumentNullException(nameof(httpClient));
         }
 
-        //public AffirmPaymentService(IPaymentRequestRepository paymentRequestRepository)
-        //{
-        //    this._paymentRequestRepository = paymentRequestRepository ??
-        //                                    throw new ArgumentNullException(nameof(paymentRequestRepository));
-        //}
-
         /// <summary>
         /// Creates a new payment and/or initiates the payment flow.
         /// </summary>
@@ -45,11 +39,15 @@
             // Save the request for later retrieval
             await this._paymentRequestRepository.SavePaymentRequestAsync(paymentIdentifier, createPaymentRequest);
             paymentResponse.paymentId = createPaymentRequest.paymentId;
-            paymentResponse.status = "undefined";
+            paymentResponse.status = AffirmConstants.Vtex.Undefined;
             // paymentResponse.tid = createPaymentRequest.reference; // Using reference because we don't have an identifier from the provider yet.
-            string redirectUrl = "/affirm-payment";
+            string redirectUrl = AffirmConstants.RedirectUrl;
             string siteHostSuffix = string.Empty;
             //paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
+            paymentResponse.paymentAppData = new PaymentAppData
+            {
+                appName = AffirmConstants.PaymentFlowAppName
+            };
 
             // Load delay settings
             VtexSettings vtexSettings = await this._paymentRequestRepository.GetAppSettings();
@@ -76,18 +74,18 @@
                     paymentResponse.delayToCancel = vtexSettings.delayToCancel * multiple;
                 }
 
-                //siteHostSuffix = vtexSettings.siteHostSuffix;
+                siteHostSuffix = vtexSettings.siteHostSuffix;
                 //paymentResponse.paymentUrl = $"{vtexSettings.siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
             }
 
             // x-vtex-root-path
             //if (string.IsNullOrEmpty(siteHostSuffix))
             //{
-                siteHostSuffix = _httpContextAccessor.HttpContext.Request.Headers["x-vtex-root-path"].ToString();
-                //if (!string.IsNullOrEmpty(siteHostSuffix))
-                //{
-                //    Console.WriteLine($"Setting Root Path as {siteHostSuffix}");
-                //}
+            //    siteHostSuffix = _httpContextAccessor.HttpContext.Request.Headers["x-vtex-root-path"].ToString();
+            //    //if (!string.IsNullOrEmpty(siteHostSuffix))
+            //    //{
+            //    //    Console.WriteLine($"Setting Root Path as {siteHostSuffix}");
+            //    //}
             //}
 
             paymentResponse.paymentUrl = $"{siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";

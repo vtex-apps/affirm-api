@@ -1,5 +1,11 @@
 ﻿namespace Affirm.Models
 {
+    public class PaymentAppData
+    {
+        public string appName { get; set; }
+        public string payload { get; set; }
+    }
+
     public class CreatePaymentResponse
     {
         /// <summary>
@@ -86,5 +92,10 @@
         /// Total time (in seconds) to wait for an authorization and make and automatic call to /cancellations to cancel the payment
         /// </summary>
         public int delayToCancel { get; set; }
+
+        /// <summary>
+        /// Indicate the app that will handle the payment flow at Checkout
+        /// </summary>
+        public PaymentAppData paymentAppData { get; set; }
     }
 }

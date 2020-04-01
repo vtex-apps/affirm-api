@@ -11,6 +11,9 @@ namespace Affirm.Services
         //public const string Sandbox = "https://sandbox.affirm.com/api/v1/";
         //public const string Live = " https://api.affirm.com/api/v1/";
 
+        public const string PaymentFlowAppName = "vtex.affirm-payment";
+        public const string RedirectUrl = "/affirm-payment";
+
         public const string SuccessResponseCode = "authorized";
         public const string TokenUsed = "checkout-token-used";
 
@@ -40,7 +43,7 @@ namespace Affirm.Services
         {
             public const string Approved = "approved";
             public const string Denied = "denied";
-
+            public const string Undefined = "undefined";
         }
     }
 }

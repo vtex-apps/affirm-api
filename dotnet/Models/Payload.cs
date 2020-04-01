@@ -8,5 +8,7 @@ namespace Affirm.Models
     {
         public string inboundRequestsUrl { get; set; }
         public string callbackUrl { get; set; }
+        public string paymentIdentifier { get; set; }
+        public string publicKey { get; set; }
     }
 }

@@ -47,7 +47,13 @@
             paymentResponse.paymentAppData = new PaymentAppData
             {
                 appName = AffirmConstants.PaymentFlowAppName,
-                payload = JsonConvert.SerializeObject(new Payload { inboundRequestsUrl = createPaymentRequest.inboundRequestsUrl, callbackUrl = createPaymentRequest.callbackUrl})
+                payload = JsonConvert.SerializeObject(new Payload
+                {
+                    inboundRequestsUrl = createPaymentRequest.inboundRequestsUrl,
+                    callbackUrl = createPaymentRequest.callbackUrl,
+                    paymentIdentifier = paymentIdentifier,
+                    publicKey = publicKey
+                })
             };
 
             // Load delay settings

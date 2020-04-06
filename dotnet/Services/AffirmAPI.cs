@@ -40,7 +40,7 @@
         {
             AffirmAuthorizeRequest authRequest = new AffirmAuthorizeRequest
             {
-                checkout_token = checkoutToken,
+                transaction_id = checkoutToken,
                 order_id = orderId
             };
 

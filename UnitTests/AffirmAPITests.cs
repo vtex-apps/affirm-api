@@ -15,14 +15,14 @@ namespace UnitTests
         readonly HttpClient httpClient = new HttpClient();
 
         // UU sandbox
-        const string privateKey = "jIRab2ct4mUnxltiNgrN0v3uFBpIvZHJ";
-        const string publicKey = "1WWKWI5U36GAG5OV";
+        //const string privateKey = "jIRab2ct4mUnxltiNgrN0v3uFBpIvZHJ";
+        //const string publicKey = "1WWKWI5U36GAG5OV";
         // UU prod
         //const string privateKey = "HQVQobWqxTjNDeyoZba6SeWBkWAePwfX";
         //const string publicKey = "RO3VDMNLGGTF2TL8";
         // Moto sandbox
-        //const string privateKey = "WqPPYUp0RJwjS2mg5oMOqmtnRQ9Qqo1n";
-        //const string publicKey = "84971L7SGAB1MVTX";
+        const string privateKey = "WqPPYUp0RJwjS2mg5oMOqmtnRQ9Qqo1n";
+        const string publicKey = "84971L7SGAB1MVTX";
 
         private string GetDynamicValue(string name, dynamic dynamicObject)
         {
@@ -92,7 +92,7 @@ namespace UnitTests
         public async Task TestMethod3()
         {
             IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
-            dynamic response = await affirmAPI.AuthorizeAsync(publicKey, privateKey, "L52L1Z67YHJNG3HX", "123456789");
+            dynamic response = await affirmAPI.AuthorizeAsync(publicKey, privateKey, "PQ7AQ3X8H9W94V1Z", "1023171562818");
             if (response != null)
             {
                 //response = GetDynamicValue("?xml", response);

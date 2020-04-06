@@ -251,9 +251,9 @@
             }
             else if (affirmResponse.status_code != null && affirmResponse.status_code == StatusCodes.Status400BadRequest.ToString() && affirmResponse.code != null && affirmResponse.code == AffirmConstants.TokenUsed)
             {
-                if (affirmResponse.charge_id != null)
+                if (affirmResponse.charge_id != null || affirmResponse.transaction_id != null)
                 {
-                    string chargeId = affirmResponse.charge_id;
+                    string chargeId = affirmResponse.charge_id ?? affirmResponse.transaction_id;
                     Console.WriteLine($"Getting current status for {chargeId}");
                     affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, chargeId);
                     if (affirmResponse.status != null && affirmResponse.status == AffirmConstants.SuccessResponseCode)
@@ -281,6 +281,11 @@
             else if (affirmResponse.Error != null && affirmResponse.Error.Message != null)
             {
                 message = affirmResponse.Error.Message;
+            }
+
+            if(affirmResponse.fields != null)
+            {
+                message = $"{message}: {affirmResponse.fields}";
             }
 
             paymentResponse.message = message;

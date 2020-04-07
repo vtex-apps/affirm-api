@@ -7,7 +7,5 @@
     public class AffirmCaptureRequest
     {
         public string order_id { get; set; }
-        public string shipping_carrier { get; set; }
-        public string shipping_confirmation { get; set; }
     }
 }

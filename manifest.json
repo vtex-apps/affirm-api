@@ -1,7 +1,7 @@
 {
   "name": "affirm-api",
   "vendor": "vtex",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "title": "Affirm",
   "description": "An implementation of Affirm",
   "categories": [],

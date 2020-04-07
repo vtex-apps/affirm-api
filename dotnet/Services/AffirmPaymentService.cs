@@ -187,10 +187,10 @@
                             capturePaymentResponse = new CapturePaymentResponse
                             {
                                 paymentId = capturePaymentRequest.paymentId,
-                                settleId = affirmResponse.reference_id ?? null,
+                                settleId = affirmResponse.id ?? null,
                                 value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
                                 code = affirmResponse.type ?? null, //affirmResponse.Error.Code,
-                                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={((affirmResponse.fee != null && affirmResponse.fee > 0) ? (decimal)affirmResponse.fee / 100m : 0):F2}": "Error", //: affirmResponse.Error.Message,
+                                message = affirmResponse.id != null ? $"Fee={((affirmResponse.fee != null && affirmResponse.fee > 0) ? (decimal)affirmResponse.fee / 100m : 0):F2}": "Error", //: affirmResponse.Error.Message,
                                 requestId = capturePaymentRequest.requestId
                             };
                         }

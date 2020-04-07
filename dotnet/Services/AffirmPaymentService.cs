@@ -26,12 +26,6 @@
                                throw new ArgumentNullException(nameof(httpClient));
         }
 
-        //public AffirmPaymentService(IPaymentRequestRepository paymentRequestRepository)
-        //{
-        //    this._paymentRequestRepository = paymentRequestRepository ??
-        //                                    throw new ArgumentNullException(nameof(paymentRequestRepository));
-        //}
-
         /// <summary>
         /// Creates a new payment and/or initiates the payment flow.
         /// </summary>
@@ -45,10 +39,22 @@
             // Save the request for later retrieval
             await this._paymentRequestRepository.SavePaymentRequestAsync(paymentIdentifier, createPaymentRequest);
             paymentResponse.paymentId = createPaymentRequest.paymentId;
-            paymentResponse.status = "undefined";
+            paymentResponse.status = AffirmConstants.Vtex.Undefined;
             // paymentResponse.tid = createPaymentRequest.reference; // Using reference because we don't have an identifier from the provider yet.
-            string redirectUrl = "/affirm-payment";
-            paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
+            string redirectUrl = AffirmConstants.RedirectUrl;
+            string siteHostSuffix = string.Empty;
+            //paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
+            paymentResponse.paymentAppData = new PaymentAppData
+            {
+                appName = AffirmConstants.PaymentFlowAppName,
+                payload = JsonConvert.SerializeObject(new Payload
+                {
+                    //inboundRequestsUrl = createPaymentRequest.inboundRequestsUrl,
+                    //callbackUrl = createPaymentRequest.callbackUrl,
+                    paymentIdentifier = paymentIdentifier,
+                    publicKey = publicKey
+                })
+            };
 
             // Load delay settings
             VtexSettings vtexSettings = await this._paymentRequestRepository.GetAppSettings();
@@ -75,8 +81,21 @@
                     paymentResponse.delayToCancel = vtexSettings.delayToCancel * multiple;
                 }
 
-                paymentResponse.paymentUrl = $"{vtexSettings.siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
+                siteHostSuffix = vtexSettings.siteHostSuffix;
+                //paymentResponse.paymentUrl = $"{vtexSettings.siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
             }
+
+            // x-vtex-root-path
+            //if (string.IsNullOrEmpty(siteHostSuffix))
+            //{
+            //    siteHostSuffix = _httpContextAccessor.HttpContext.Request.Headers["x-vtex-root-path"].ToString();
+            //    //if (!string.IsNullOrEmpty(siteHostSuffix))
+            //    //{
+            //    //    Console.WriteLine($"Setting Root Path as {siteHostSuffix}");
+            //    //}
+            //}
+
+            //paymentResponse.paymentUrl = $"{siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
 
             return paymentResponse;
         }
@@ -130,28 +149,58 @@
         public async Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey)
         {
             bool isLive = await this.GetIsLiveSetting();
+            CapturePaymentResponse capturePaymentResponse = new CapturePaymentResponse
+            {
+                message = "Unknown Error."
+            };
 
             // Load request from storage for order id
             CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(capturePaymentRequest.paymentId);
-
-            if (capturePaymentRequest.authorizationId == null)
+            if (paymentRequest == null)
             {
-                // Get Affirm id from storage
-                capturePaymentRequest.authorizationId = paymentRequest.transactionId;
+                capturePaymentResponse.message = "Could not load Payment Request.";
             }
-
-            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId, string.Empty, string.Empty);
-
-            CapturePaymentResponse capturePaymentResponse = new CapturePaymentResponse
+            else
             {
-                paymentId = capturePaymentRequest.paymentId,
-                settleId = affirmResponse.transaction_id,
-                value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
-                code = affirmResponse.type ?? affirmResponse.Error.Code,
-                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee > 0 ? (decimal)affirmResponse.fee / 100m : 0):F2}" : affirmResponse.Error.Message,
-                requestId = capturePaymentRequest.requestId
-            };
+                if (capturePaymentRequest.authorizationId == null)
+                {
+                    // Get Affirm id from storage
+                    capturePaymentRequest.authorizationId = paymentRequest.transactionId;
+                }
+
+                if (string.IsNullOrEmpty(capturePaymentRequest.authorizationId) || string.IsNullOrEmpty(paymentRequest.orderId))
+                {
+                    capturePaymentResponse.message = "Missing authorizationId or orderId.";
+                }
+                else
+                {
+                    IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+                    try
+                    {
+                        dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId);
+                        if (affirmResponse == null)
+                        {
+                            capturePaymentResponse.message = "Null affirmResponse.";
+                        }
+                        else
+                        {
+                            capturePaymentResponse = new CapturePaymentResponse
+                            {
+                                paymentId = capturePaymentRequest.paymentId,
+                                settleId = affirmResponse.id ?? null,
+                                value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
+                                code = affirmResponse.type ?? null, //affirmResponse.Error.Code,
+                                message = affirmResponse.id != null ? $"Fee={((affirmResponse.fee != null && affirmResponse.fee > 0) ? (decimal)affirmResponse.fee / 100m : 0):F2}": "Error", //: affirmResponse.Error.Message,
+                                requestId = capturePaymentRequest.requestId
+                            };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        capturePaymentResponse.message = $"CapturePaymentAsync Error: {ex.Message}";
+                    };
+                }
+            }
 
             return capturePaymentResponse;
         }
@@ -232,9 +281,9 @@
             }
             else if (affirmResponse.status_code != null && affirmResponse.status_code == StatusCodes.Status400BadRequest.ToString() && affirmResponse.code != null && affirmResponse.code == AffirmConstants.TokenUsed)
             {
-                if (affirmResponse.charge_id != null)
+                if (affirmResponse.charge_id != null || affirmResponse.transaction_id != null)
                 {
-                    string chargeId = affirmResponse.charge_id;
+                    string chargeId = affirmResponse.charge_id ?? affirmResponse.transaction_id;
                     Console.WriteLine($"Getting current status for {chargeId}");
                     affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, chargeId);
                     if (affirmResponse.status != null && affirmResponse.status == AffirmConstants.SuccessResponseCode)
@@ -247,7 +296,7 @@
             CreatePaymentResponse paymentResponse = new CreatePaymentResponse();
             paymentResponse.paymentId = paymentIdentifier;
             paymentResponse.status = paymentStatus;
-            paymentResponse.tid = affirmResponse.id ?? null;
+            paymentResponse.tid = affirmResponse.checkout_id ?? null;
             paymentResponse.authorizationId = affirmResponse.id ?? null;
             paymentResponse.code = affirmResponse.status ?? affirmResponse.status_code ?? affirmResponse.Error?.Code;
             string message = string.Empty;
@@ -262,6 +311,11 @@
             else if (affirmResponse.Error != null && affirmResponse.Error.Message != null)
             {
                 message = affirmResponse.Error.Message;
+            }
+
+            if(affirmResponse.fields != null)
+            {
+                message = $"{message}: {affirmResponse.fields}";
             }
 
             paymentResponse.message = message;

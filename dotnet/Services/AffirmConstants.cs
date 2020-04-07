@@ -6,16 +6,13 @@ namespace Affirm.Services
 {
     public class AffirmConstants
     {
-        public const string Sandbox = "https://sandbox.affirm.com/api/v2/";
-        public const string Live = " https://api.affirm.com/api/v2/";
+        //public const string Sandbox = "https://sandbox.affirm.com/api/v2/";
+        //public const string Live = " https://api.affirm.com/api/v2/";
+        //public const string Sandbox = "https://sandbox.affirm.com/api/v1/";
+        //public const string Live = " https://api.affirm.com/api/v1/";
 
-        public const string Authorize = "";
-        public const string Read = "";
-        public const string ReadCharge = "";
-        public const string Capture = "";
-        public const string Void = "";
-        public const string Refund = "";
-        public const string Update = "charges/{charge_id}/update";
+        public const string PaymentFlowAppName = "vtex.affirm-payment";
+        public const string RedirectUrl = "/affirm-payment";
 
         public const string SuccessResponseCode = "authorized";
         public const string TokenUsed = "checkout-token-used";
@@ -23,6 +20,18 @@ namespace Affirm.Services
         public const string PrivateKeyHeader = "X-PROVIDER-API-AppToken";
         public const string PublicKeyHeader = "X-PROVIDER-API-AppKey";
         public const string IsProduction = "X-Vtex-Workspace-Is-Production";
+
+        public const string Authorize = "authorize";
+        public const string Read = "read";
+        public const string Capture = "capture";
+        public const string Void = "void";
+        public const string Refund = "refund";
+        public const string Update = "update";
+
+        public const string AffirmUrlStub = "affirm.com";
+        public const string AffirmApiVersion = "api/v1";
+        public const string Charges = "charges";
+        public const string Transactions = "transactions";
 
         public class Inbound
         {
@@ -34,7 +43,7 @@ namespace Affirm.Services
         {
             public const string Approved = "approved";
             public const string Denied = "denied";
-
+            public const string Undefined = "undefined";
         }
     }
 }

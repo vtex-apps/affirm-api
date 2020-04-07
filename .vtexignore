@@ -1,3 +1,6 @@
 dontnet/obj/
 dontnet/bin/
 UnitTests/
+.gitignore
+README.md
+.vs

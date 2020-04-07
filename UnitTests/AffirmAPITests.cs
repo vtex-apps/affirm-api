@@ -125,9 +125,7 @@ namespace UnitTests
 
             AffirmCaptureRequest captureRequest = new AffirmCaptureRequest
             {
-                order_id = orderId,
-                shipping_carrier = "TBD",
-                shipping_confirmation = "TBD"
+                order_id = orderId
             };
 
             var jsonSerializedRequest = JsonConvert.SerializeObject(captureRequest);
@@ -135,7 +133,7 @@ namespace UnitTests
             {
                 Method = HttpMethod.Post,
                 RequestUri = new Uri($"{BASE_URL}/{AffirmConstants.Transactions}/{chargeId}/{AffirmConstants.Capture}"),
-                Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
+                //Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
             };
 
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicKey}:{privateKey}")));

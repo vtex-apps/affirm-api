@@ -72,29 +72,21 @@
         /// <returns></returns>
         public async Task<JObject> CaptureAsync(string publicApiKey, string privateApiKey, string chargeId, string orderId, string shippingCarrier, string shippingConfirmation)
         {
-            if(string.IsNullOrEmpty(shippingCarrier))
-            {
-                shippingCarrier = "TBD";
-            }
+            /// The CaptureRequest must have all three fields populated - removing for now.
 
-            if (string.IsNullOrEmpty(shippingConfirmation))
-            {
-                shippingConfirmation = "TBD";
-            }
+            //AffirmCaptureRequest captureRequest = new AffirmCaptureRequest
+            //{
+            //    order_id = orderId,
+            //    shipping_carrier = shippingCarrier,
+            //    shipping_confirmation = shippingConfirmation
+            //};
 
-            AffirmCaptureRequest captureRequest = new AffirmCaptureRequest
-            {
-                order_id = orderId,
-                shipping_carrier = shippingCarrier,
-                shipping_confirmation = shippingConfirmation
-            };
-
-            var jsonSerializedRequest = JsonConvert.SerializeObject(captureRequest);
+            //var jsonSerializedRequest = JsonConvert.SerializeObject(captureRequest);
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
                 RequestUri = new Uri($"{affirmBaseUrl}/{AffirmConstants.Transactions}/{chargeId}/{AffirmConstants.Capture}"),
-                Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
+                //Content = new StringContent(jsonSerializedRequest, Encoding.UTF8, APPLICATION_JSON)
             };
 
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));

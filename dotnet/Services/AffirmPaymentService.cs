@@ -149,28 +149,58 @@
         public async Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey)
         {
             bool isLive = await this.GetIsLiveSetting();
+            CapturePaymentResponse capturePaymentResponse = new CapturePaymentResponse
+            {
+                message = "Unknown Error."
+            };
 
             // Load request from storage for order id
             CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(capturePaymentRequest.paymentId);
-
-            if (capturePaymentRequest.authorizationId == null)
+            if (paymentRequest == null)
             {
-                // Get Affirm id from storage
-                capturePaymentRequest.authorizationId = paymentRequest.transactionId;
+                capturePaymentResponse.message = "Could not load Payment Request.";
             }
-
-            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
-            dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId, string.Empty, string.Empty);
-
-            CapturePaymentResponse capturePaymentResponse = new CapturePaymentResponse
+            else
             {
-                paymentId = capturePaymentRequest.paymentId,
-                settleId = affirmResponse.transaction_id,
-                value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
-                code = affirmResponse.type ?? affirmResponse.Error.Code,
-                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee > 0 ? (decimal)affirmResponse.fee / 100m : 0):F2}" : affirmResponse.Error.Message,
-                requestId = capturePaymentRequest.requestId
-            };
+                if (capturePaymentRequest.authorizationId == null)
+                {
+                    // Get Affirm id from storage
+                    capturePaymentRequest.authorizationId = paymentRequest.transactionId;
+                }
+
+                if (string.IsNullOrEmpty(capturePaymentRequest.authorizationId) || string.IsNullOrEmpty(paymentRequest.orderId))
+                {
+                    capturePaymentResponse.message = "Missing authorizationId or orderId.";
+                }
+                else
+                {
+                    IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+                    try
+                    {
+                        dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId, string.Empty, string.Empty);
+                        if (affirmResponse == null)
+                        {
+                            capturePaymentResponse.message = "Null affirmResponse.";
+                        }
+                        else
+                        {
+                            capturePaymentResponse = new CapturePaymentResponse
+                            {
+                                paymentId = capturePaymentRequest.paymentId,
+                                settleId = affirmResponse.reference_id ?? null,
+                                value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
+                                code = affirmResponse.type ?? null, //affirmResponse.Error.Code,
+                                message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={((affirmResponse.fee != null && affirmResponse.fee > 0) ? (decimal)affirmResponse.fee / 100m : 0):F2}": "Error", //: affirmResponse.Error.Message,
+                                requestId = capturePaymentRequest.requestId
+                            };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        capturePaymentResponse.message = $"CapturePaymentAsync Error: {ex.Message}";
+                    };
+                }
+            }
 
             return capturePaymentResponse;
         }
@@ -267,7 +297,7 @@
             paymentResponse.paymentId = paymentIdentifier;
             paymentResponse.status = paymentStatus;
             paymentResponse.tid = affirmResponse.id ?? null;
-            paymentResponse.authorizationId = affirmResponse.id ?? null;
+            paymentResponse.authorizationId = affirmResponse.checkout_id ?? null;
             paymentResponse.code = affirmResponse.status ?? affirmResponse.status_code ?? affirmResponse.Error?.Code;
             string message = string.Empty;
             if (affirmResponse.events != null)
@@ -295,7 +325,7 @@
             // Save the Affirm id & order number - will need for capture
             CreatePaymentRequest paymentRequest = new CreatePaymentRequest
             {
-                transactionId = affirmResponse.id,
+                transactionId = affirmResponse.checkout_id,
                 orderId = orderId
             };
 

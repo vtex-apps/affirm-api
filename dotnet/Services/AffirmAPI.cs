@@ -72,6 +72,16 @@
         /// <returns></returns>
         public async Task<JObject> CaptureAsync(string publicApiKey, string privateApiKey, string chargeId, string orderId, string shippingCarrier, string shippingConfirmation)
         {
+            if(string.IsNullOrEmpty(shippingCarrier))
+            {
+                shippingCarrier = "TBD";
+            }
+
+            if (string.IsNullOrEmpty(shippingConfirmation))
+            {
+                shippingConfirmation = "TBD";
+            }
+
             AffirmCaptureRequest captureRequest = new AffirmCaptureRequest
             {
                 order_id = orderId,
@@ -121,7 +131,7 @@
         }
 
         /// <summary>
-        /// Read the charge information, current charge status, and checkout data for one or more {AffirmConstants.Transactions}.
+        /// Read the charge information, current charge status, and checkout data for one or more charges.
         /// This is useful for updating your records or order management system with current charge states
         /// before performing actions on them. It also allows you to keep your system in sync with Affirm
         /// if your staff manually manages loans in the merchant dashboard.

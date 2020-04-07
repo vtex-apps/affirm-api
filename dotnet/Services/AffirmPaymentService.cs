@@ -296,8 +296,8 @@
             CreatePaymentResponse paymentResponse = new CreatePaymentResponse();
             paymentResponse.paymentId = paymentIdentifier;
             paymentResponse.status = paymentStatus;
-            paymentResponse.tid = affirmResponse.id ?? null;
-            paymentResponse.authorizationId = affirmResponse.checkout_id ?? null;
+            paymentResponse.tid = affirmResponse.checkout_id ?? null;
+            paymentResponse.authorizationId = affirmResponse.id ?? null;
             paymentResponse.code = affirmResponse.status ?? affirmResponse.status_code ?? affirmResponse.Error?.Code;
             string message = string.Empty;
             if (affirmResponse.events != null)
@@ -325,7 +325,7 @@
             // Save the Affirm id & order number - will need for capture
             CreatePaymentRequest paymentRequest = new CreatePaymentRequest
             {
-                transactionId = affirmResponse.checkout_id,
+                transactionId = affirmResponse.id,
                 orderId = orderId
             };
 

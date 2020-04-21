@@ -44,10 +44,6 @@
       "path": "/affirm/payment-provider/payments/:paymentIdentifier/auth/:token/:callbackUrl/:orderTotal",
       "public": true
     },
-    "readCharge": {
-      "path": "/affirm/payment-provider/payments/:paymentIdentifier/read",
-      "public": true
-    },
     "getAppSettings": {
       "path": "/affirm/payment-provider/payments/settings",
       "public": false

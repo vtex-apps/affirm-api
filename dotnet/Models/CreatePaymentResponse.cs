@@ -1,11 +1,5 @@
 ﻿namespace Affirm.Models
 {
-    public class PaymentAppData
-    {
-        public string appName { get; set; }
-        public string payload { get; set; }
-    }
-
     public class CreatePaymentResponse
     {
         /// <summary>

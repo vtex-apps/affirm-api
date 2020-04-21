@@ -12,7 +12,7 @@
       "path": "/affirm/print-headers-priv",
       "public": false
     },
-    "inboundAsync": {
+    "inbound": {
       "path": "/affirm/payment-provider/payments/:paymentId/inbound/:actiontype",
       "public": true
     },
@@ -20,31 +20,31 @@
       "path": "/affirm/payment-provider/payment-methods",
       "public": true
     },
-    "createPaymentAsync": {
+    "createPayment": {
       "path": "/affirm/payment-provider/payments",
       "public": true
     },
-    "cancelPaymentAsync": {
+    "cancelPayment": {
       "path": "/affirm/payment-provider/payments/:paymentId/cancellations",
       "public": true
     },
-    "capturePaymentAsync": {
+    "capturePayment": {
       "path": "/affirm/payment-provider/payments/:paymentId/settlements",
       "public": true
     },
-    "refundPaymentAsync": {
+    "refundPayment": {
       "path": "/affirm/payment-provider/payments/:paymentId/refunds",
       "public": true
     },
-    "getPaymentRequestAsync": {
+    "getPaymentRequest": {
       "path": "/affirm/payment-provider/payments/:paymentIdentifier/request",
       "public": true
     },
-    "authorizeAsync": {
+    "authorize": {
       "path": "/affirm/payment-provider/payments/:paymentIdentifier/auth/:token/:callbackUrl/:orderTotal",
       "public": true
     },
-    "readChargeAsync": {
+    "readCharge": {
       "path": "/affirm/payment-provider/payments/:paymentIdentifier/read",
       "public": true
     },

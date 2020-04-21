@@ -45,10 +45,22 @@
             // Save the request for later retrieval
             await this._paymentRequestRepository.SavePaymentRequestAsync(paymentIdentifier, createPaymentRequest);
             paymentResponse.paymentId = createPaymentRequest.paymentId;
-            paymentResponse.status = "undefined";
+            paymentResponse.status = AffirmConstants.Vtex.Undefined;
             // paymentResponse.tid = createPaymentRequest.reference; // Using reference because we don't have an identifier from the provider yet.
-            string redirectUrl = "/affirm-payment";
-            paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
+            string redirectUrl = AffirmConstants.RedirectUrl;
+            string siteHostSuffix = string.Empty;
+            paymentResponse.paymentAppData = new PaymentAppData
+            {
+                appName = AffirmConstants.PaymentFlowAppName,
+                payload = JsonConvert.SerializeObject(new Payload
+                {
+                    //inboundRequestsUrl = createPaymentRequest.inboundRequestsUrl,
+                    //callbackUrl = createPaymentRequest.callbackUrl,
+                    paymentIdentifier = paymentIdentifier,
+                    publicKey = publicKey,
+                    sandboxMode = createPaymentRequest.sandboxMode
+                })
+            };
 
             // Load delay settings
             VtexSettings vtexSettings = await this._paymentRequestRepository.GetAppSettings();
@@ -91,7 +103,7 @@
             CancelPaymentResponse cancelPaymentResponse = null;
             if (!string.IsNullOrEmpty(cancelPaymentRequest.authorizationId))
             {
-                bool isLive = await this.GetIsLiveSetting();
+                bool isLive = cancelPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
                 IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
                 dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
 
@@ -129,7 +141,11 @@
         /// <returns></returns>
         public async Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey)
         {
-            bool isLive = await this.GetIsLiveSetting();
+            bool isLive = capturePaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
+            CapturePaymentResponse capturePaymentResponse = new CapturePaymentResponse
+            {
+                message = "Unknown Error."
+            };
 
             // Load request from storage for order id
             CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(capturePaymentRequest.paymentId);
@@ -143,7 +159,7 @@
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId, string.Empty, string.Empty);
 
-            CapturePaymentResponse capturePaymentResponse = new CapturePaymentResponse
+            capturePaymentResponse = new CapturePaymentResponse
             {
                 paymentId = capturePaymentRequest.paymentId,
                 settleId = affirmResponse.transaction_id,
@@ -163,7 +179,7 @@
         /// <returns></returns>
         public async Task<RefundPaymentResponse> RefundPaymentAsync(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey)
         {
-            bool isLive = await this.GetIsLiveSetting();
+            bool isLive = refundPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
 
             if (refundPaymentRequest.authorizationId == null)
             {
@@ -213,9 +229,9 @@
         /// <param name="publicKey"></param>
         /// <param name="privateKey"></param>
         /// <returns></returns>
-        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId)
+        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId, bool sandboxMode)
         {
-            bool isLive = await this.GetIsLiveSetting();
+            bool isLive = sandboxMode; // await this.GetIsLiveSetting();
 
             if (string.IsNullOrEmpty(orderId))
             {
@@ -280,9 +296,9 @@
             return paymentResponse;
         }
 
-        public async Task<CreatePaymentResponse> ReadChargeAsync(string paymentId, string publicKey, string privateKey)
+        public async Task<CreatePaymentResponse> ReadChargeAsync(string paymentId, string publicKey, string privateKey, bool sandboxMode)
         {
-            bool isLive = await this.GetIsLiveSetting();
+            bool isLive = sandboxMode; // await this.GetIsLiveSetting();
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, paymentId);
             //dynamic affirmResponse = await affirmAPI.ReadAsync(publicKey, privateKey, paymentId);

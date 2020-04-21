@@ -24,6 +24,9 @@ namespace Affirm.Services
         public const string PublicKeyHeader = "X-PROVIDER-API-AppKey";
         public const string IsProduction = "X-Vtex-Workspace-Is-Production";
 
+        public const string PaymentFlowAppName = "vtex.affirm-payment";
+        public const string RedirectUrl = "/affirm-payment";
+
         public class Inbound
         {
             public const string ActionAuthorize = "auth";
@@ -34,7 +37,7 @@ namespace Affirm.Services
         {
             public const string Approved = "approved";
             public const string Denied = "denied";
-
+            public const string Undefined = "undefined";
         }
     }
 }

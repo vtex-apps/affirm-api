@@ -52,7 +52,8 @@
                     //inboundRequestsUrl = createPaymentRequest.inboundRequestsUrl,
                     //callbackUrl = createPaymentRequest.callbackUrl,
                     paymentIdentifier = paymentIdentifier,
-                    publicKey = publicKey
+                    publicKey = publicKey,
+                    sandboxMode = createPaymentRequest.sandboxMode
                 })
             };
 
@@ -110,7 +111,7 @@
             CancelPaymentResponse cancelPaymentResponse = null;
             if (!string.IsNullOrEmpty(cancelPaymentRequest.authorizationId))
             {
-                bool isLive = await this.GetIsLiveSetting();
+                bool isLive = cancelPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
                 IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
                 dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
 
@@ -148,7 +149,8 @@
         /// <returns></returns>
         public async Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey)
         {
-            bool isLive = await this.GetIsLiveSetting();
+
+            bool isLive = capturePaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
             CapturePaymentResponse capturePaymentResponse = new CapturePaymentResponse
             {
                 message = "Unknown Error."
@@ -162,13 +164,13 @@
             }
             else
             {
-                if (capturePaymentRequest.authorizationId == null)
+                if (capturePaymentRequest.transactionId == null)
                 {
                     // Get Affirm id from storage
-                    capturePaymentRequest.authorizationId = paymentRequest.transactionId;
+                    capturePaymentRequest.transactionId = paymentRequest.transactionId;
                 }
 
-                if (string.IsNullOrEmpty(capturePaymentRequest.authorizationId) || string.IsNullOrEmpty(paymentRequest.orderId))
+                if (string.IsNullOrEmpty(capturePaymentRequest.transactionId) || string.IsNullOrEmpty(paymentRequest.orderId))
                 {
                     capturePaymentResponse.message = "Missing authorizationId or orderId.";
                 }
@@ -212,7 +214,7 @@
         /// <returns></returns>
         public async Task<RefundPaymentResponse> RefundPaymentAsync(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey)
         {
-            bool isLive = await this.GetIsLiveSetting();
+            bool isLive = refundPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
 
             if (refundPaymentRequest.authorizationId == null)
             {
@@ -262,9 +264,9 @@
         /// <param name="publicKey"></param>
         /// <param name="privateKey"></param>
         /// <returns></returns>
-        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId)
+        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId, bool sandboxMode)
         {
-            bool isLive = await this.GetIsLiveSetting();
+            bool isLive = sandboxMode; // await this.GetIsLiveSetting();
 
             if (string.IsNullOrEmpty(orderId))
             {
@@ -296,8 +298,8 @@
             CreatePaymentResponse paymentResponse = new CreatePaymentResponse();
             paymentResponse.paymentId = paymentIdentifier;
             paymentResponse.status = paymentStatus;
-            paymentResponse.tid = affirmResponse.checkout_id ?? null;
-            paymentResponse.authorizationId = affirmResponse.id ?? null;
+            paymentResponse.tid = affirmResponse.id ?? null;
+            paymentResponse.authorizationId = affirmResponse.checkout_id ?? null;
             paymentResponse.code = affirmResponse.status ?? affirmResponse.status_code ?? affirmResponse.Error?.Code;
             string message = string.Empty;
             if (affirmResponse.events != null)
@@ -334,9 +336,9 @@
             return paymentResponse;
         }
 
-        public async Task<CreatePaymentResponse> ReadChargeAsync(string paymentId, string publicKey, string privateKey)
+        public async Task<CreatePaymentResponse> ReadChargeAsync(string paymentId, string publicKey, string privateKey, bool sandboxMode)
         {
-            bool isLive = await this.GetIsLiveSetting();
+            bool isLive = sandboxMode; // await this.GetIsLiveSetting();
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
             dynamic affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, paymentId);
             //dynamic affirmResponse = await affirmAPI.ReadAsync(publicKey, privateKey, paymentId);

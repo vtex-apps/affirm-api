@@ -10,5 +10,6 @@ namespace Affirm.Models
         public string callbackUrl { get; set; }
         public string paymentIdentifier { get; set; }
         public string publicKey { get; set; }
+        public bool sandboxMode { get; set; }
     }
 }

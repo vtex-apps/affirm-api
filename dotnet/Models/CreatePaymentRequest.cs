@@ -78,6 +78,8 @@
         public string inboundRequestsUrl { get; set; }
 
         public string orderId { get; set; }
+
+        public bool sandboxMode { get; set; }
     }
 
     public class Expiration

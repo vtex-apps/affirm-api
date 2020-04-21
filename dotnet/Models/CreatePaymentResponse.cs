@@ -1,11 +1,5 @@
 ﻿namespace Affirm.Models
 {
-    public class PaymentAppData
-    {
-        public string appName { get; set; }
-        public string payload { get; set; }
-    }
-
     public class CreatePaymentResponse
     {
         /// <summary>
@@ -97,5 +91,11 @@
         /// Indicate the app that will handle the payment flow at Checkout
         /// </summary>
         public PaymentAppData paymentAppData { get; set; }
+    }
+
+    public class PaymentAppData
+    {
+        public string appName { get; set; }
+        public string payload { get; set; }
     }
 }

@@ -11,9 +11,6 @@ namespace Affirm.Services
         //public const string Sandbox = "https://sandbox.affirm.com/api/v1/";
         //public const string Live = " https://api.affirm.com/api/v1/";
 
-        public const string PaymentFlowAppName = "vtex.affirm-payment";
-        public const string RedirectUrl = "/affirm-payment";
-
         public const string SuccessResponseCode = "authorized";
         public const string TokenUsed = "checkout-token-used";
 
@@ -21,6 +18,8 @@ namespace Affirm.Services
         public const string PublicKeyHeader = "X-PROVIDER-API-AppKey";
         public const string IsProduction = "X-Vtex-Workspace-Is-Production";
 
+        public const string PaymentFlowAppName = "vtex.affirm-payment";
+        public const string RedirectUrl = "/affirm-payment";
         public const string Authorize = "authorize";
         public const string Read = "read";
         public const string Capture = "capture";

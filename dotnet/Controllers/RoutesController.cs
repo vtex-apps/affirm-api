@@ -23,7 +23,7 @@
         /// </summary>
         /// <param name="createPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<IActionResult> CreatePaymentAsync()
+        public async Task<IActionResult> CreatePayment()
         {
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
             var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
@@ -41,7 +41,7 @@
         /// <param name="paymentId">VTEX payment ID from this payment</param>
         /// <param name="cancelPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<IActionResult> CancelPaymentAsync(string paymentId)
+        public async Task<IActionResult> CancelPayment(string paymentId)
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
@@ -67,7 +67,7 @@
         /// <param name="paymentId">VTEX payment ID from this payment</param>
         /// <param name="capturePaymentRequest"></param>
         /// <returns></returns>
-        public async Task<IActionResult> CapturePaymentAsync(string paymentId)
+        public async Task<IActionResult> CapturePayment(string paymentId)
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
@@ -93,7 +93,7 @@
         /// <param name="paymentId">VTEX payment ID from this payment</param>
         /// <param name="refundPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<IActionResult> RefundPaymentAsync(string paymentId)
+        public async Task<IActionResult> RefundPayment(string paymentId)
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
@@ -118,7 +118,7 @@
         /// </summary>
         /// <param name="paymentIdentifier">Payment GUID</param>
         /// <returns></returns>
-        public async Task<IActionResult> GetPaymentRequestAsync(string paymentIdentifier)
+        public async Task<IActionResult> GetPaymentRequest(string paymentIdentifier)
         {
             var paymentRequest = await this._affirmPaymentService.GetCreatePaymentRequestAsync(paymentIdentifier);
 
@@ -136,7 +136,7 @@
         /// <param name="paymentIdentifier">Payment GUID</param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<IActionResult> AuthorizeAsync(string paymentIdentifier, string token, string callbackUrl, int orderTotal)
+        public async Task<IActionResult> Authorize(string paymentIdentifier, string token, string callbackUrl, int orderTotal, bool sandboxMode)
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
@@ -147,7 +147,7 @@
             }
             else
             {
-                var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentIdentifier, token, publicKey, privateKey, callbackUrl, orderTotal, string.Empty);
+                var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentIdentifier, token, publicKey, privateKey, callbackUrl, orderTotal, string.Empty, sandboxMode);
                 Response.Headers.Add("Cache-Control", "private");
 
                 return Json(paymentRequest);
@@ -160,7 +160,7 @@
         /// <param name="paymentIdentifier">Payment GUID</param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<IActionResult> ReadChargeAsync(string paymentIdentifier)
+        public async Task<IActionResult> ReadCharge(string paymentIdentifier, string sandboxMode)
         {
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
@@ -171,14 +171,14 @@
             }
             else
             {
-                var paymentRequest = await this._affirmPaymentService.ReadChargeAsync(paymentIdentifier, publicKey, privateKey);
+                var paymentRequest = await this._affirmPaymentService.ReadChargeAsync(paymentIdentifier, publicKey, privateKey, bool.Parse(sandboxMode));
                 Response.Headers.Add("Cache-Control", "private");
 
                 return Json(paymentRequest);
             }
         }
 
-        public async Task<IActionResult> InboundAsync(string actiontype)
+        public async Task<IActionResult> Inbound(string actiontype)
         {
             Console.WriteLine($"InboundAsync action = {actiontype}");
 
@@ -222,6 +222,7 @@
                         string callbackUrl = inboundRequestBody.callbackUrl;
                         int amount = inboundRequestBody.orderTotal;
                         string orderId = inboundRequestBody.orderId;
+                        bool sandboxMode = inboundRequestBody.sandboxMode;
                         if (string.IsNullOrEmpty(paymentId) || string.IsNullOrEmpty(token) || string.IsNullOrEmpty(callbackUrl))
                         {
                             responseStatusCode = StatusCodes.Status400BadRequest.ToString();
@@ -229,7 +230,7 @@
                         }
                         else
                         {
-                            var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentId, token, publicKey, privateKey, callbackUrl, amount, orderId);
+                            var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentId, token, publicKey, privateKey, callbackUrl, amount, orderId, sandboxMode);
                             Response.Headers.Add("Cache-Control", "private");
 
                             responseBody = JsonConvert.SerializeObject(paymentRequest);

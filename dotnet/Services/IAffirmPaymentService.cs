@@ -15,9 +15,9 @@
 
         Task<CreatePaymentRequest> GetCreatePaymentRequestAsync(string paymentIdentifier);
 
-        Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId);
+        Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId, bool sandboxMode);
 
-        Task<CreatePaymentResponse> ReadChargeAsync(string paymentId, string publicKey, string privateKey);
+        Task<CreatePaymentResponse> ReadChargeAsync(string paymentId, string publicKey, string privateKey, bool sandboxMode);
 
         Task<VtexSettings> GetSettingsAsync();
     }

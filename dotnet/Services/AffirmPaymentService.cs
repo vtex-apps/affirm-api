@@ -164,13 +164,13 @@
             }
             else
             {
-                if (capturePaymentRequest.authorizationId == null)
+                if (capturePaymentRequest.transactionId == null)
                 {
                     // Get Affirm id from storage
-                    capturePaymentRequest.authorizationId = paymentRequest.transactionId;
+                    capturePaymentRequest.transactionId = paymentRequest.transactionId;
                 }
 
-                if (string.IsNullOrEmpty(capturePaymentRequest.authorizationId) || string.IsNullOrEmpty(paymentRequest.orderId))
+                if (string.IsNullOrEmpty(capturePaymentRequest.transactionId) || string.IsNullOrEmpty(paymentRequest.orderId))
                 {
                     capturePaymentResponse.message = "Missing authorizationId or orderId.";
                 }
@@ -298,8 +298,8 @@
             CreatePaymentResponse paymentResponse = new CreatePaymentResponse();
             paymentResponse.paymentId = paymentIdentifier;
             paymentResponse.status = paymentStatus;
-            paymentResponse.tid = affirmResponse.checkout_id ?? null;
-            paymentResponse.authorizationId = affirmResponse.id ?? null;
+            paymentResponse.tid = affirmResponse.id ?? null;
+            paymentResponse.authorizationId = affirmResponse.checkout_id ?? null;
             paymentResponse.code = affirmResponse.status ?? affirmResponse.status_code ?? affirmResponse.Error?.Code;
             string message = string.Empty;
             if (affirmResponse.events != null)

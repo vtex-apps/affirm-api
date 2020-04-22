@@ -222,7 +222,7 @@
                         string callbackUrl = inboundRequestBody.callbackUrl;
                         int amount = inboundRequestBody.orderTotal;
                         string orderId = inboundRequestBody.orderId;
-                        bool sandboxMode = inboundRequestBody.sandboxMode;
+                        bool sandboxMode = inboundRequest.sandboxMode;
                         if (string.IsNullOrEmpty(paymentId) || string.IsNullOrEmpty(token) || string.IsNullOrEmpty(callbackUrl))
                         {
                             responseStatusCode = StatusCodes.Status400BadRequest.ToString();

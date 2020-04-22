@@ -164,13 +164,13 @@
             }
             else
             {
-                if (capturePaymentRequest.transactionId == null)
+                if (capturePaymentRequest.authorizationId == null)
                 {
                     // Get Affirm id from storage
-                    capturePaymentRequest.transactionId = paymentRequest.transactionId;
+                    capturePaymentRequest.authorizationId = paymentRequest.transactionId;
                 }
 
-                if (string.IsNullOrEmpty(capturePaymentRequest.transactionId) || string.IsNullOrEmpty(paymentRequest.orderId))
+                if (string.IsNullOrEmpty(capturePaymentRequest.authorizationId) || string.IsNullOrEmpty(paymentRequest.orderId))
                 {
                     capturePaymentResponse.message = "Missing authorizationId or orderId.";
                 }
@@ -179,7 +179,7 @@
                     IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
                     try
                     {
-                        dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.transactionId, paymentRequest.orderId);
+                        dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId);
                         if (affirmResponse == null)
                         {
                             capturePaymentResponse.message = "Null affirmResponse.";

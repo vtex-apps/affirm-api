@@ -5,3 +5,4 @@ See documentation for [Affirm Payment](https://github.com/vtex-apps/affirm-payme
 **Upcoming documentation:**
 
  - [Update service.json](https://github.com/vtex-apps/affirm-api/pull/5)
+ - [use tid instead of auth id](https://github.com/vtex-apps/affirm-api/pull/9)

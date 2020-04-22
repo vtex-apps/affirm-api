@@ -109,6 +109,22 @@
         public async Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey)
         {
             CancelPaymentResponse cancelPaymentResponse = null;
+
+            // Load request from storage for order id
+            CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(cancelPaymentRequest.paymentId);
+            if (paymentRequest == null)
+            {
+                cancelPaymentResponse.message = "Could not load Payment Request.";
+            }
+            else
+            {
+                if (cancelPaymentRequest.authorizationId == null)
+                {
+                    // Get Affirm id from storage
+                    cancelPaymentRequest.authorizationId = paymentRequest.transactionId;
+                }
+            }
+
             if (!string.IsNullOrEmpty(cancelPaymentRequest.authorizationId))
             {
                 bool isLive = !cancelPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
@@ -121,20 +137,9 @@
                 cancelPaymentResponse = new CancelPaymentResponse
                 {
                     paymentId = cancelPaymentRequest.paymentId,
-                    cancellationId = affirmResponse.transaction_id ?? Guid.NewGuid().ToString(),
+                    cancellationId = affirmResponse.transaction_id ?? null,
                     code = affirmResponse.type ?? affirmResponse.Error.Code,
                     message = affirmResponse.id ?? affirmResponse.Error.Message,
-                    requestId = cancelPaymentRequest.requestId
-                };
-            }
-            else
-            {
-                cancelPaymentResponse = new CancelPaymentResponse
-                {
-                    paymentId = cancelPaymentRequest.paymentId,
-                    cancellationId = Guid.NewGuid().ToString(),
-                    code = null,
-                    message = null,
                     requestId = cancelPaymentRequest.requestId
                 };
             }

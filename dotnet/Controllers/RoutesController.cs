@@ -178,7 +178,7 @@
             }
         }
 
-        public async Task<IActionResult> Inbound(string actiontype)
+        public async Task<IActionResult> Inbound(string paymentId, string actiontype)
         {
             Console.WriteLine($"InboundAsync action = {actiontype}");
 
@@ -201,7 +201,7 @@
                 responseMessage = ex.Message;
             }
 
-            string paymentId = inboundRequest.paymentId;
+            paymentId = inboundRequest.paymentId;
             string requestId = inboundRequest.requestId;
 
             if(inboundRequestBody == null)

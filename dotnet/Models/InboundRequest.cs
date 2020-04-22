@@ -17,5 +17,6 @@
         public string authorizationId { get; set; }
         public string tid { get; set; }
         public RequestData requestData { get; set; }
+        public bool sandboxMode { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace Vtex
 
     public class StartupExtender
     {
-        public void ExtendConstructor(IConfiguration config, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void ExtendConstructor(IConfiguration config, IWebHostEnvironment env)
         {
 
         }
@@ -27,12 +27,12 @@ namespace Vtex
             services.AddTransient<IAffirmPaymentService, AffirmPaymentService>();
         }
 
-        public void ExtendConfigureBeforeMvc(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void ExtendConfigureBeforeRouting(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
         }
 
-        public void ExtendConfigureAfterMvc(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void ExtendConfigureBeforeEndpoint(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
         }

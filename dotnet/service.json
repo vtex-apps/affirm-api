@@ -40,10 +40,6 @@
       "path": "/affirm/payment-provider/payments/:paymentIdentifier/request",
       "public": true
     },
-    "authorize": {
-      "path": "/affirm/payment-provider/payments/:paymentIdentifier/auth/:token/:callbackUrl/:orderTotal",
-      "public": true
-    },
     "getAppSettings": {
       "path": "/affirm/payment-provider/payments/settings",
       "public": false

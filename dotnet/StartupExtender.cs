@@ -7,7 +7,6 @@ namespace Vtex
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
     using System.Net.Http;
 
     public class StartupExtender
@@ -19,7 +18,6 @@ namespace Vtex
 
         public void ExtendConfigureServices(IServiceCollection services)
         {
-            //throw new System.Exception("extend");
             services.AddSingleton<HttpClient>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IVtexEnvironmentVariableProvider, VtexEnvironmentVariableProvider>();

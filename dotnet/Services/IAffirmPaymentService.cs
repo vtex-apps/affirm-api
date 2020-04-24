@@ -5,20 +5,20 @@
 
     public interface IAffirmPaymentService
     {
-        Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest createPaymentRequest, string publicKey);
+        Task<CreatePaymentResponse> CreatePayment(CreatePaymentRequest createPaymentRequest, string publicKey);
 
-        Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey);
+        Task<CancelPaymentResponse> CancelPayment(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey);
 
-        Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey);
+        Task<CapturePaymentResponse> CapturePayment(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey);
 
-        Task<RefundPaymentResponse> RefundPaymentAsync(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey);
+        Task<RefundPaymentResponse> RefundPayment(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey);
 
-        Task<CreatePaymentRequest> GetCreatePaymentRequestAsync(string paymentIdentifier);
+        Task<CreatePaymentRequest> GetCreatePaymentRequest(string paymentIdentifier);
 
-        Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId, bool sandboxMode);
+        Task<CreatePaymentResponse> Authorize(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId, bool sandboxMode);
 
-        Task<CreatePaymentResponse> ReadChargeAsync(string paymentId, string publicKey, string privateKey, bool sandboxMode);
+        Task<CreatePaymentResponse> ReadCharge(string paymentId, string publicKey, string privateKey, bool sandboxMode);
 
-        Task<VtexSettings> GetSettingsAsync();
+        Task<VtexSettings> GetSettings();
     }
 }

@@ -31,7 +31,7 @@
         /// </summary>
         /// <param name="createPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest createPaymentRequest, string publicKey)
+        public async Task<CreatePaymentResponse> CreatePayment(CreatePaymentRequest createPaymentRequest, string publicKey)
         {
             CreatePaymentResponse paymentResponse = new CreatePaymentResponse();
             string paymentIdentifier = Guid.NewGuid().ToString();
@@ -106,7 +106,7 @@
         /// </summary>
         /// <param name="cancelPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<CancelPaymentResponse> CancelPaymentAsync(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey)
+        public async Task<CancelPaymentResponse> CancelPayment(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey)
         {
             CancelPaymentResponse cancelPaymentResponse = null;
 
@@ -152,7 +152,7 @@
         /// </summary>
         /// <param name="capturePaymentRequest"></param>
         /// <returns></returns>
-        public async Task<CapturePaymentResponse> CapturePaymentAsync(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey)
+        public async Task<CapturePaymentResponse> CapturePayment(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey)
         {
 
             bool isLive = !capturePaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
@@ -197,7 +197,7 @@
                                 settleId = affirmResponse.id ?? null,
                                 value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
                                 code = affirmResponse.type ?? null, //affirmResponse.Error.Code,
-                                message = affirmResponse.id != null ? $"Fee={((affirmResponse.fee != null && affirmResponse.fee > 0) ? (decimal)affirmResponse.fee / 100m : 0):F2}": "Error", //: affirmResponse.Error.Message,
+                                message = affirmResponse.id != null ? $"Fee={((affirmResponse.fee != null && affirmResponse.fee > 0) ? (decimal)affirmResponse.fee / 100m : 0):F2}": affirmResponse.message ?? "Error", //: affirmResponse.Error.Message,
                                 requestId = capturePaymentRequest.requestId
                             };
                         }
@@ -217,7 +217,7 @@
         /// </summary>
         /// <param name="refundPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<RefundPaymentResponse> RefundPaymentAsync(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey)
+        public async Task<RefundPaymentResponse> RefundPayment(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey)
         {
             bool isLive = !refundPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
 
@@ -251,7 +251,7 @@
         /// </summary>
         /// <param name="paymentIdentifier"></param>
         /// <returns></returns>
-        public async Task<CreatePaymentRequest> GetCreatePaymentRequestAsync(string paymentIdentifier)
+        public async Task<CreatePaymentRequest> GetCreatePaymentRequest(string paymentIdentifier)
         {
             CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(paymentIdentifier);
 
@@ -269,7 +269,7 @@
         /// <param name="publicKey"></param>
         /// <param name="privateKey"></param>
         /// <returns></returns>
-        public async Task<CreatePaymentResponse> AuthorizeAsync(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId, bool sandboxMode)
+        public async Task<CreatePaymentResponse> Authorize(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId, bool sandboxMode)
         {
             bool isLive = !sandboxMode; // await this.GetIsLiveSetting();
 
@@ -341,7 +341,7 @@
             return paymentResponse;
         }
 
-        public async Task<CreatePaymentResponse> ReadChargeAsync(string paymentId, string publicKey, string privateKey, bool sandboxMode)
+        public async Task<CreatePaymentResponse> ReadCharge(string paymentId, string publicKey, string privateKey, bool sandboxMode)
         {
             bool isLive = !sandboxMode; // await this.GetIsLiveSetting();
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
@@ -351,7 +351,7 @@
             return affirmResponse;
         }
 
-        public async Task<VtexSettings> GetSettingsAsync()
+        public async Task<VtexSettings> GetSettings()
         {
             VtexSettings settings = await this._paymentRequestRepository.GetAppSettings();
 

@@ -28,7 +28,7 @@
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
             var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             CreatePaymentRequest createPaymentRequest = JsonConvert.DeserializeObject<CreatePaymentRequest>(bodyAsText);
-            var paymentResponse = await this._affirmPaymentService.CreatePaymentAsync(createPaymentRequest, publicKey);
+            CreatePaymentResponse paymentResponse = await this._affirmPaymentService.CreatePayment(createPaymentRequest, publicKey);
 
             Response.Headers.Add("Cache-Control", "private");
 
@@ -55,7 +55,7 @@
             }
             else
             {
-                var cancelResponse = await this._affirmPaymentService.CancelPaymentAsync(cancelPaymentRequest, publicKey, privateKey);
+                CancelPaymentResponse cancelResponse = await this._affirmPaymentService.CancelPayment(cancelPaymentRequest, publicKey, privateKey);
 
                 return Json(cancelResponse);
             }
@@ -81,7 +81,7 @@
             }
             else
             {
-                var captureResponse = await this._affirmPaymentService.CapturePaymentAsync(capturePaymentRequest, publicKey, privateKey);
+                CapturePaymentResponse captureResponse = await this._affirmPaymentService.CapturePayment(capturePaymentRequest, publicKey, privateKey);
 
                 return Json(captureResponse);
             }
@@ -107,7 +107,7 @@
             }
             else
             {
-                var refundResponse = await this._affirmPaymentService.RefundPaymentAsync(refundPaymentRequest, publicKey, privateKey);
+                RefundPaymentResponse refundResponse = await this._affirmPaymentService.RefundPayment(refundPaymentRequest, publicKey, privateKey);
 
                 return Json(refundResponse);
             }
@@ -120,7 +120,7 @@
         /// <returns></returns>
         public async Task<IActionResult> GetPaymentRequest(string paymentIdentifier)
         {
-            var paymentRequest = await this._affirmPaymentService.GetCreatePaymentRequestAsync(paymentIdentifier);
+            var paymentRequest = await this._affirmPaymentService.GetCreatePaymentRequest(paymentIdentifier);
 
             Response.Headers.Add("Cache-Control", "private");
 
@@ -147,10 +147,10 @@
             }
             else
             {
-                var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentIdentifier, token, publicKey, privateKey, callbackUrl, orderTotal, string.Empty, sandboxMode);
+                CreatePaymentResponse paymentResponse = await this._affirmPaymentService.Authorize(paymentIdentifier, token, publicKey, privateKey, callbackUrl, orderTotal, string.Empty, sandboxMode);
                 Response.Headers.Add("Cache-Control", "private");
 
-                return Json(paymentRequest);
+                return Json(paymentResponse);
             }
         }
 
@@ -171,10 +171,10 @@
             }
             else
             {
-                var paymentRequest = await this._affirmPaymentService.ReadChargeAsync(paymentIdentifier, publicKey, privateKey, bool.Parse(sandboxMode));
+                CreatePaymentResponse paymentResponse = await this._affirmPaymentService.ReadCharge(paymentIdentifier, publicKey, privateKey, bool.Parse(sandboxMode));
                 Response.Headers.Add("Cache-Control", "private");
 
-                return Json(paymentRequest);
+                return Json(paymentResponse);
             }
         }
 
@@ -230,7 +230,7 @@
                         }
                         else
                         {
-                            var paymentRequest = await this._affirmPaymentService.AuthorizeAsync(paymentId, token, publicKey, privateKey, callbackUrl, amount, orderId, sandboxMode);
+                            var paymentRequest = await this._affirmPaymentService.Authorize(paymentId, token, publicKey, privateKey, callbackUrl, amount, orderId, sandboxMode);
                             Response.Headers.Add("Cache-Control", "private");
 
                             responseBody = JsonConvert.SerializeObject(paymentRequest);
@@ -263,7 +263,7 @@
 
         public async Task<IActionResult> GetAppSettings()
         {
-            VtexSettings paymentRequest = await this._affirmPaymentService.GetSettingsAsync();
+            VtexSettings paymentRequest = await this._affirmPaymentService.GetSettings();
 
             return Json(paymentRequest);
         }

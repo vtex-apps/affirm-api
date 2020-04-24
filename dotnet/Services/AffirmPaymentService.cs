@@ -118,11 +118,11 @@
             }
             else
             {
-                if (cancelPaymentRequest.authorizationId == null)
-                {
+                //if (cancelPaymentRequest.authorizationId == null)
+                //{
                     // Get Affirm id from storage
                     cancelPaymentRequest.authorizationId = paymentRequest.transactionId;
-                }
+                //}
             }
 
             if (!string.IsNullOrEmpty(cancelPaymentRequest.authorizationId))
@@ -130,16 +130,16 @@
                 bool isLive = !cancelPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
                 IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
                 dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
-
+                
                 // If affirmResponse.transaction_id is null, assume the payment was never authorized.
                 // TODO: Make a call to 'Read' to get token status.
                 // This will require storing and loading the token from vbase.
                 cancelPaymentResponse = new CancelPaymentResponse
                 {
                     paymentId = cancelPaymentRequest.paymentId,
-                    cancellationId = affirmResponse.transaction_id ?? null,
+                    cancellationId = affirmResponse.id ?? null,
                     code = affirmResponse.type ?? affirmResponse.Error.Code,
-                    message = affirmResponse.id ?? affirmResponse.Error.Message,
+                    message = affirmResponse.created ?? affirmResponse.Error.Message,
                     requestId = cancelPaymentRequest.requestId
                 };
             }

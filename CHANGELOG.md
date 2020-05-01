@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- If Auth fails, check status in Affirm
+
 ## [1.1.9] - 2020-04-24
 
 ## [1.1.8] - 2020-04-24
@@ -20,6 +24,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.1.3] - 2020-04-22
 
 ## [1.1.1] - 2020-04-21
+
+### Added
+
+- Added support for Katapult
 
 ## [0.1.2] - 2019-08-23
 

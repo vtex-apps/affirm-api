@@ -286,7 +286,7 @@
             {
                 paymentStatus = AffirmConstants.Vtex.Approved;
             }
-            else if (affirmResponse.status_code != null && affirmResponse.status_code == StatusCodes.Status400BadRequest.ToString() && affirmResponse.code != null && affirmResponse.code == AffirmConstants.TokenUsed)
+            else //if (affirmResponse.status_code != null && affirmResponse.status_code == StatusCodes.Status403Forbidden.ToString() && affirmResponse.code != null && affirmResponse.code == AffirmConstants.TokenUsed)
             {
                 if (affirmResponse.charge_id != null || affirmResponse.transaction_id != null)
                 {

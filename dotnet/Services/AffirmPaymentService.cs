@@ -175,9 +175,9 @@
                     capturePaymentRequest.authorizationId = paymentRequest.transactionId;
                 }
 
-                if (string.IsNullOrEmpty(capturePaymentRequest.authorizationId) || string.IsNullOrEmpty(paymentRequest.orderId))
+                if (string.IsNullOrEmpty(capturePaymentRequest.authorizationId))
                 {
-                    capturePaymentResponse.message = "Missing authorizationId or orderId.";
+                    capturePaymentResponse.message = "Missing authorizationId.";
                 }
                 else
                 {
@@ -191,15 +191,31 @@
                         }
                         else
                         {
-                            capturePaymentResponse = new CapturePaymentResponse
+                            // If "Already Captured" then fake a success response.
+                            if (affirmResponse.type != null && affirmResponse.type == AffirmConstants.AlreadyCaptured)
                             {
-                                paymentId = capturePaymentRequest.paymentId,
-                                settleId = affirmResponse.id ?? null,
-                                value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
-                                code = affirmResponse.type ?? null, //affirmResponse.Error.Code,
-                                message = affirmResponse.id != null ? $"Fee={((affirmResponse.fee != null && affirmResponse.fee > 0) ? (decimal)affirmResponse.fee / 100m : 0):F2}": affirmResponse.message ?? "Error", //: affirmResponse.Error.Message,
-                                requestId = capturePaymentRequest.requestId
-                            };
+                                capturePaymentResponse = new CapturePaymentResponse
+                                {
+                                    paymentId = capturePaymentRequest.paymentId,
+                                    settleId = affirmResponse.id ?? affirmResponse.type,
+                                    value = affirmResponse.amount == null ? capturePaymentRequest.value : (decimal)affirmResponse.amount / 100m,
+                                    code = affirmResponse.type ?? null, //affirmResponse.Error.Code,
+                                    message = affirmResponse.id != null ? $"Fee={((affirmResponse.fee != null && affirmResponse.fee > 0) ? (decimal)affirmResponse.fee / 100m : 0):F2}" : affirmResponse.message ?? "Error", //: affirmResponse.Error.Message,
+                                    requestId = capturePaymentRequest.requestId
+                                };
+                            }
+                            else
+                            {
+                                capturePaymentResponse = new CapturePaymentResponse
+                                {
+                                    paymentId = capturePaymentRequest.paymentId,
+                                    settleId = affirmResponse.id ?? null,
+                                    value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
+                                    code = affirmResponse.type ?? null, //affirmResponse.Error.Code,
+                                    message = affirmResponse.id != null ? $"Fee={((affirmResponse.fee != null && affirmResponse.fee > 0) ? (decimal)affirmResponse.fee / 100m : 0):F2}" : affirmResponse.message ?? "Error", //: affirmResponse.Error.Message,
+                                    requestId = capturePaymentRequest.requestId
+                                };
+                            }
                         }
                     }
                     catch (Exception ex)

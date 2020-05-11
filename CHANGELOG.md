@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.1.11] - 2020-05-11
+
 ### Fixed
 
 - If already captured fake success response

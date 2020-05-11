@@ -32,6 +32,8 @@ namespace Affirm.Services
         public const string Charges = "charges";
         public const string Transactions = "transactions";
 
+        public const string AlreadyCaptured = "already_captured";
+
         public class Inbound
         {
             public const string ActionAuthorize = "auth";

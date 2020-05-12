@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- On auth, do not save payment info if data is missing
+
 ## [1.1.11] - 2020-05-11
 
 ### Fixed

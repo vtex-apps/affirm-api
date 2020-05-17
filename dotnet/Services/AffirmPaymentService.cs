@@ -352,7 +352,11 @@
                 orderId = orderId
             };
 
-            await this._paymentRequestRepository.SavePaymentRequestAsync(paymentIdentifier, paymentRequest);
+            // Don't save if data is missing
+            if (!string.IsNullOrEmpty(paymentRequest.transactionId) && !string.IsNullOrEmpty(paymentRequest.orderId))
+            {
+                await this._paymentRequestRepository.SavePaymentRequestAsync(paymentIdentifier, paymentRequest);
+            }
 
             return paymentResponse;
         }

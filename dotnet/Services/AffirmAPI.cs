@@ -70,11 +70,13 @@
         /// Full or partial refunds can be processed within 120 days
         /// </summary>
         /// <returns></returns>
-        public async Task<JObject> CaptureAsync(string publicApiKey, string privateApiKey, string chargeId, string orderId)
+        public async Task<JObject> CaptureAsync(string publicApiKey, string privateApiKey, string chargeId, string orderId, decimal amount)
         {
+            int amountInPennies = (int)(amount * 100);
             AffirmCaptureRequest captureRequest = new AffirmCaptureRequest
             {
-                order_id = orderId
+                order_id = orderId,
+                amount = amountInPennies
             };
 
             var jsonSerializedRequest = JsonConvert.SerializeObject(captureRequest);

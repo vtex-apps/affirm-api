@@ -46,7 +46,7 @@
         /// Full or partial refunds can be processed within 120 days
         /// </summary>
         /// <returns></returns>
-        Task<JObject> CaptureAsync(string publicApiKey, string privateApiKey, string chargeId, string orderId);
+        Task<JObject> CaptureAsync(string publicApiKey, string privateApiKey, string chargeId, string orderId, decimal amount);
 
         /// <summary>
         /// Cancel an authorized charge. After voiding a loan:

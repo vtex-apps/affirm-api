@@ -184,7 +184,7 @@
                     IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
                     try
                     {
-                        dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId);
+                        dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId, capturePaymentRequest.value);
                         if (affirmResponse == null)
                         {
                             capturePaymentResponse.message = "Null affirmResponse.";

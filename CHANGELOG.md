@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- On Cancel, if there is no authorization_id, assume the order was never completed and return successful cancellation
+
 ## [1.1.13] - 2020-05-28
 
 ### Fixed

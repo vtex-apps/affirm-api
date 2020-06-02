@@ -108,13 +108,20 @@
         /// <returns></returns>
         public async Task<CancelPaymentResponse> CancelPayment(CancelPaymentRequest cancelPaymentRequest, string publicKey, string privateKey)
         {
-            CancelPaymentResponse cancelPaymentResponse = null;
+            CancelPaymentResponse cancelPaymentResponse = new CancelPaymentResponse
+            {
+                cancellationId = null,
+                code = null,
+                message = "Empty",
+                paymentId = cancelPaymentRequest.paymentId,
+                requestId = cancelPaymentRequest.requestId
+            };
 
             // Load request from storage for order id
             CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(cancelPaymentRequest.paymentId);
             if (paymentRequest == null)
             {
-                cancelPaymentResponse.message = "Could not load Payment Request.";
+                cancelPaymentResponse.message = $"Could not load Payment Request for Payment Id {cancelPaymentRequest.paymentId}.";
             }
             else
             {
@@ -142,6 +149,11 @@
                     message = affirmResponse.created ?? affirmResponse.Error.Message,
                     requestId = cancelPaymentRequest.requestId
                 };
+            }
+            else
+            {
+                // Assume that the order was never authorized
+                cancelPaymentResponse.cancellationId = "not_authorized";
             }
 
             return cancelPaymentResponse;

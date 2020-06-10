@@ -228,6 +228,16 @@
                                     requestId = capturePaymentRequest.requestId
                                 };
                             }
+
+                            //if (capturePaymentRequest.authorizationId.StartsWith(AffirmConstants.KatapultIdPrefix))
+                            //{
+                            //    // Need to get details from Katapult
+                            //    VtexSettings vtexSettings = await _paymentRequestRepository.GetAppSettings();
+                            //    if (vtexSettings.enableKatapult)
+                            //    {
+                            //        var katapultResponse = await affirmAPI.KatapultFundingAsync(vtexSettings.katapultPublicToken, vtexSettings.katapultPrivateToken, paymentRequest.orderId);
+                            //    }
+                            //}
                         }
                     }
                     catch (Exception ex)

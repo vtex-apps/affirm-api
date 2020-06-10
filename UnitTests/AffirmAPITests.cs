@@ -26,8 +26,13 @@ namespace UnitTests
         //const string privateKey = "HQVQobWqxTjNDeyoZba6SeWBkWAePwfX";
         //const string publicKey = "RO3VDMNLGGTF2TL8";
         // Moto sandbox
-        const string privateKey = "WqPPYUp0RJwjS2mg5oMOqmtnRQ9Qqo1n";
-        const string publicKey = "84971L7SGAB1MVTX";
+        //const string privateKey = "WqPPYUp0RJwjS2mg5oMOqmtnRQ9Qqo1n";
+        //const string publicKey = "84971L7SGAB1MVTX";
+        // TxBoot Production
+        const string privateKey = "DY0q1NAP8Aazx0TEkmeQF9UHklC78Y1F";
+        const string publicKey = "H0TVR6WUOR0OC9V3";
+
+        const string chargeId = "OJ67060WEYCQEZL3";
 
         private string GetDynamicValue(string name, dynamic dynamicObject)
         {
@@ -50,7 +55,7 @@ namespace UnitTests
         public async Task TestMethod1()
         {
             IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
-            dynamic response = await affirmAPI.ReadAsync(publicKey, privateKey, "U5LL34ABTDS8A7DM");
+            dynamic response = await affirmAPI.ReadAsync(publicKey, privateKey, chargeId);
             if(response != null)
             {
                 //response = GetDynamicValue("?xml", response);
@@ -65,7 +70,7 @@ namespace UnitTests
             }
             else
             {
-                Console.WriteLine(response);
+                Assert.Fail();
             }
         }
 
@@ -73,7 +78,7 @@ namespace UnitTests
         public async Task TestMethod2()
         {
             IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
-            dynamic response = await affirmAPI.ReadChargeAsync(publicKey, privateKey, "U5LL34ABTDS8A7DM");
+            dynamic response = await affirmAPI.ReadChargeAsync(publicKey, privateKey, chargeId);
             if (response != null)
             {
                 //response = GetDynamicValue("?xml", response);
@@ -118,14 +123,34 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public async Task FundingTestMethod()
+        {
+            string katapultPrivate = "98a0104fcc074efc6bf9da5fddd499bf752dcccf ";
+            string katapultPublic = "88baae1fbd93cb3a12aa301f99efe94eec2a1f5a ";
+
+            IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
+            dynamic response = await affirmAPI.KatapultFundingAsync(katapultPublic, katapultPrivate, "1033711204843-01");
+            if (response != null)
+            {
+                Console.WriteLine(response);
+            }
+            else
+            {
+                Assert.Fail();
+            }
+        }
+
+        [TestMethod]
         public async Task TestCapture()
         {
-            string orderId = "1023252261358";
-            string chargeId = "UDXG-SW24";
+            string orderId = "1038111762115";
+            string chargeId = "FXIW-UJX5";
+            decimal value = 433.99M;
 
             AffirmCaptureRequest captureRequest = new AffirmCaptureRequest
             {
-                order_id = orderId
+                order_id = orderId,
+                amount = (int)(value * 100)
             };
 
             var jsonSerializedRequest = JsonConvert.SerializeObject(captureRequest);
@@ -140,6 +165,22 @@ namespace UnitTests
 
             HttpClient client = new HttpClient();
             var response = await client.SendAsync(request);
+            string responseContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseContent);
+        }
+
+        [TestMethod]
+        public async Task TestRead()
+        {
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"{BASE_URL}/checkout/{chargeId}")
+            };
+
+            request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicKey}:{privateKey}")));
+
+            var response = await httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
             Console.WriteLine(responseContent);
         }

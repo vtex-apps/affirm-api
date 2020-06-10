@@ -20,7 +20,7 @@ namespace UnitTests
         readonly HttpClient httpClient = new HttpClient();
 
         // UU sandbox
-        const string privateKey = "jIRab2ct4mUnxltiNgrN0v3uFBpIvZHJ";
+        const string privateKey = "";
         const string publicKey = "1WWKWI5U36GAG5OV";
 
         const string chargeId = "OJ67060WEYCQEZL3";

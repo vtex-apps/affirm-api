@@ -20,17 +20,8 @@ namespace UnitTests
         readonly HttpClient httpClient = new HttpClient();
 
         // UU sandbox
-        //const string privateKey = "jIRab2ct4mUnxltiNgrN0v3uFBpIvZHJ";
-        //const string publicKey = "1WWKWI5U36GAG5OV";
-        // UU prod
-        //const string privateKey = "HQVQobWqxTjNDeyoZba6SeWBkWAePwfX";
-        //const string publicKey = "RO3VDMNLGGTF2TL8";
-        // Moto sandbox
-        //const string privateKey = "WqPPYUp0RJwjS2mg5oMOqmtnRQ9Qqo1n";
-        //const string publicKey = "84971L7SGAB1MVTX";
-        // TxBoot Production
-        const string privateKey = "DY0q1NAP8Aazx0TEkmeQF9UHklC78Y1F";
-        const string publicKey = "H0TVR6WUOR0OC9V3";
+        const string privateKey = "jIRab2ct4mUnxltiNgrN0v3uFBpIvZHJ";
+        const string publicKey = "1WWKWI5U36GAG5OV";
 
         const string chargeId = "OJ67060WEYCQEZL3";
 

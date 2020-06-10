@@ -15,6 +15,7 @@
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private string affirmBaseUrl;
+        private string katapultBaseUrl;
         private const string APPLICATION_JSON = "application/json";
         private const string HEADER_VTEX_CREDENTIAL = "X-Vtex-Credential";
 
@@ -24,6 +25,7 @@
             this._httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             string prefix = isLive ? "api" : "sandbox";
             this.affirmBaseUrl = $"http://{prefix}.{AffirmConstants.AffirmUrlStub}/{AffirmConstants.AffirmApiVersion}";
+            this.katapultBaseUrl = $"http://{prefix}.{AffirmConstants.KatapultUrlStub}/{AffirmConstants.KatapultApiVersion}";
         }
 
         /// <summary>
@@ -225,6 +227,25 @@
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
             request.Headers.Add("X-Vtex-Use-Https", "true");
             request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
+
+            var response = await _httpClient.SendAsync(request);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            return ParseAffirmResponse(response, responseContent);
+        }
+
+        public async Task<JObject> KatapultFundingAsync(string publicApiKey, string privateApiKey, string orderId)
+        {
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"{katapultBaseUrl}/{AffirmConstants.Application}/{AffirmConstants.Funding}")
+                //RequestUri = new Uri($"{katapultBaseUrl}/{AffirmConstants.Application}/{AffirmConstants.Funding}?order_id={orderId}")
+            };
+
+            request.Headers.Add("Authorization", $"Bearer {publicApiKey}");
+            request.Headers.Add("X-Vtex-Use-Https", "true");
+            //request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();

@@ -32,6 +32,14 @@ namespace Affirm.Services
         public const string Charges = "charges";
         public const string Transactions = "transactions";
 
+        // https://sandbox.katapult.com/api/v3/application/funding/
+        public const string KatapultUrlStub = "katapult.com";
+        public const string KatapultApiVersion = "api/v3";
+        public const string Application = "application";
+        public const string Funding = "funding";
+
+        public const string KatapultIdPrefix = "LS-";
+
         public const string AlreadyCaptured = "already_captured";
 
         public class Inbound

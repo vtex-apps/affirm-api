@@ -1,9 +1,11 @@
 ﻿namespace Affirm.Models
 {
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.Text;
 
+    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class AffirmUpdateRequest
     {
         public string order_id { get; set; }

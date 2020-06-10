@@ -14,5 +14,8 @@
         public int delayToCancel { get; set; }
         public string delayInterval { get; set; }
         public string siteHostSuffix { get; set; }
+        public bool enableKatapult { get; set; }
+        public string katapultPublicToken { get; set; }
+        public string katapultPrivateToken { get; set; }
     }
 }

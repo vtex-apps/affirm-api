@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+ ### Added
+ 
+- Get Katapult funding information
+
 ## [1.1.15] - 2020-06-10
 
 ### Fixed

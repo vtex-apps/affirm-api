@@ -5,6 +5,7 @@
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
     using System;
+    using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
 
@@ -229,15 +230,20 @@
                                 };
                             }
 
-                            //if (capturePaymentRequest.authorizationId.StartsWith(AffirmConstants.KatapultIdPrefix))
-                            //{
-                            //    // Need to get details from Katapult
-                            //    VtexSettings vtexSettings = await _paymentRequestRepository.GetAppSettings();
-                            //    if (vtexSettings.enableKatapult)
-                            //    {
-                            //        var katapultResponse = await affirmAPI.KatapultFundingAsync(vtexSettings.katapultPublicToken, vtexSettings.katapultPrivateToken, paymentRequest.orderId);
-                            //    }
-                            //}
+                            if (capturePaymentRequest.authorizationId.StartsWith(AffirmConstants.KatapultIdPrefix))
+                            {
+                                // Need to get details from Katapult
+                                VtexSettings vtexSettings = await _paymentRequestRepository.GetAppSettings();
+                                if (vtexSettings.enableKatapult)
+                                {
+                                    KatapultFunding katapultResponse = await affirmAPI.KatapultFundingAsync(vtexSettings.katapultPrivateToken);
+                                    if(katapultResponse != null)
+                                    {
+                                        FundingObject fundingObject = katapultResponse.FundingReport.FundingObjects.Where(f => f.OrderId.Equals(paymentRequest.orderId)).FirstOrDefault();
+                                        capturePaymentResponse.message = JsonConvert.SerializeObject(fundingObject);
+                                    }
+                                }
+                            }
                         }
                     }
                     catch (Exception ex)

@@ -234,23 +234,31 @@
             return ParseAffirmResponse(response, responseContent);
         }
 
-        public async Task<JObject> KatapultFundingAsync(string publicApiKey, string privateApiKey, string orderId)
+        public async Task<KatapultFunding> KatapultFundingAsync(string privateApiKey)
         {
+            KatapultFunding katapultFunding = null;
+            DateTime dateTime = DateTime.Now;
+            string startDate = dateTime.AddDays(-30).ToString("yyyy-MM-dd");
+            string endDate = dateTime.ToString("yyyy-MM-dd");
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"{katapultBaseUrl}/{AffirmConstants.Application}/{AffirmConstants.Funding}")
-                //RequestUri = new Uri($"{katapultBaseUrl}/{AffirmConstants.Application}/{AffirmConstants.Funding}?order_id={orderId}")
+                RequestUri = new Uri($"{katapultBaseUrl}/{AffirmConstants.Application}/{AffirmConstants.Funding}/?date_filter=origination_date&end={endDate}&start={startDate}")
             };
 
-            request.Headers.Add("Authorization", $"Bearer {publicApiKey}");
+            request.Headers.Add("Authorization", $"Bearer {privateApiKey}");
             request.Headers.Add("X-Vtex-Use-Https", "true");
             //request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
 
-            return ParseAffirmResponse(response, responseContent);
+            if(response.IsSuccessStatusCode)
+            {
+                katapultFunding = JsonConvert.DeserializeObject<KatapultFunding>(responseContent);
+            }
+
+            return katapultFunding;
         }
 
         private JObject ParseAffirmResponse(HttpResponseMessage httpResponse, string responseContent)

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -116,14 +117,16 @@ namespace UnitTests
         [TestMethod]
         public async Task FundingTestMethod()
         {
-            string katapultPrivate = "98a0104fcc074efc6bf9da5fddd499bf752dcccf ";
-            string katapultPublic = "88baae1fbd93cb3a12aa301f99efe94eec2a1f5a ";
+            string katapultPrivate = " ";
+            string katapultPublic = " ";
+            string ordernumber = "1033711204843";
 
             IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
-            dynamic response = await affirmAPI.KatapultFundingAsync(katapultPublic, katapultPrivate, "1033711204843-01");
-            if (response != null)
+            KatapultFunding katapultResponse = await affirmAPI.KatapultFundingAsync(katapultPrivate);
+            if (katapultResponse != null)
             {
-                Console.WriteLine(response);
+                FundingObject fundingObject = katapultResponse.FundingReport.FundingObjects.Where(f => f.OrderId.Equals(ordernumber)).FirstOrDefault();
+                Console.WriteLine(JsonConvert.SerializeObject(fundingObject));
             }
             else
             {

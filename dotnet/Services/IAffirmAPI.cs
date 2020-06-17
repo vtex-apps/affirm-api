@@ -68,6 +68,6 @@
         /// <returns></returns>
         Task<JObject> UpdateAsync(string publicApiKey, string privateApiKey, string chargeId, string orderId, string customerContactInfo, string shippingCarrier, string trackingNumber);
 
-        Task<JObject> KatapultFundingAsync(string publicApiKey, string privateApiKey, string orderId);
+        Task<KatapultFunding> KatapultFundingAsync(string privateApiKey);
     }
 }

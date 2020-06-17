@@ -60,6 +60,20 @@
         "path": "/api/v2/*"
       }
     },
+	{
+      "name": "outbound-access",
+      "attrs": {
+        "host": "sandbox.katapult.com",
+        "path": "/api/v3/*"
+      }
+    },
+	{
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.katapult.com",
+        "path": "/api/v3/*"
+      }
+    },
     {
       "name": "vbase-read-write"
     }

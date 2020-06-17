@@ -248,7 +248,7 @@
 
             request.Headers.Add("Authorization", $"Bearer {privateApiKey}");
             request.Headers.Add("X-Vtex-Use-Https", "true");
-            //request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
+            request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();

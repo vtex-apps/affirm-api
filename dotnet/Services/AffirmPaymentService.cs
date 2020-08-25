@@ -138,8 +138,8 @@
                 bool isLive = !cancelPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
                 IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
                 dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
-                
-                // If affirmResponse.transaction_id is null, assume the payment was never authorized.
+
+                // If affirmResponse.reference_id is null, assume the payment was never authorized.
                 // TODO: Make a call to 'Read' to get token status.
                 // This will require storing and loading the token from vbase.
                 cancelPaymentResponse = new CancelPaymentResponse
@@ -280,7 +280,7 @@
             RefundPaymentResponse refundPaymentResponse = new RefundPaymentResponse
             {
                 paymentId = refundPaymentRequest.paymentId,
-                refundId = affirmResponse.transaction_id,
+                refundId = affirmResponse.reference_id,
                 value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
                 code = affirmResponse.type ?? affirmResponse.Error.Code,
                 message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee_refunded > 0 ? (decimal)affirmResponse.fee_refunded / 100m : 0):F2}" : affirmResponse.Error.Message,
@@ -332,9 +332,9 @@
             }
             else //if (affirmResponse.status_code != null && affirmResponse.status_code == StatusCodes.Status403Forbidden.ToString() && affirmResponse.code != null && affirmResponse.code == AffirmConstants.TokenUsed)
             {
-                if (affirmResponse.charge_id != null || affirmResponse.transaction_id != null)
+                if (affirmResponse.charge_id != null || affirmResponse.reference_id != null)
                 {
-                    string chargeId = affirmResponse.charge_id ?? affirmResponse.transaction_id;
+                    string chargeId = affirmResponse.charge_id ?? affirmResponse.reference_id;
                     Console.WriteLine($"Getting current status for {chargeId}");
                     affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, chargeId);
                     if (affirmResponse.status != null && affirmResponse.status == AffirmConstants.SuccessResponseCode)

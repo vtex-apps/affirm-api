@@ -46,7 +46,7 @@ namespace UnitTests
         [TestMethod]
         public async Task TestMethod1()
         {
-            IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
+            IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false, null);
             dynamic response = await affirmAPI.ReadAsync(publicKey, privateKey, chargeId);
             if(response != null)
             {
@@ -69,7 +69,7 @@ namespace UnitTests
         [TestMethod]
         public async Task TestMethod2()
         {
-            IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
+            IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false, null);
             dynamic response = await affirmAPI.ReadChargeAsync(publicKey, privateKey, chargeId);
             if (response != null)
             {
@@ -93,7 +93,7 @@ namespace UnitTests
         [TestMethod]
         public async Task TestMethod3()
         {
-            IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
+            IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false, null);
             dynamic response = await affirmAPI.AuthorizeAsync(publicKey, privateKey, "U5LL34ABTDS8A7DM", "1023171562818");
             if (response != null)
             {
@@ -121,7 +121,7 @@ namespace UnitTests
             string katapultPublic = " ";
             string ordernumber = "1033711204843";
 
-            IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false);
+            IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false, null);
             KatapultFunding katapultResponse = await affirmAPI.KatapultFundingAsync(katapultPrivate);
             if (katapultResponse != null)
             {

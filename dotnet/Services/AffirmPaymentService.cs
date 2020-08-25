@@ -8,14 +8,16 @@
     using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Vtex.Api.Context;
 
     public class AffirmPaymentService : IAffirmPaymentService
     {
         private readonly IPaymentRequestRepository _paymentRequestRepository;
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IIOServiceContext _context;
 
-        public AffirmPaymentService(IPaymentRequestRepository paymentRequestRepository, IHttpContextAccessor httpContextAccessor, HttpClient httpClient)
+        public AffirmPaymentService(IPaymentRequestRepository paymentRequestRepository, IHttpContextAccessor httpContextAccessor, HttpClient httpClient, IIOServiceContext context)
         {
             this._paymentRequestRepository = paymentRequestRepository ??
                                             throw new ArgumentNullException(nameof(paymentRequestRepository));
@@ -25,6 +27,9 @@
 
             this._httpClient = httpClient ??
                                throw new ArgumentNullException(nameof(httpClient));
+
+            this._context = context ??
+                               throw new ArgumentNullException(nameof(context));
         }
 
         /// <summary>
@@ -136,7 +141,7 @@
             if (!string.IsNullOrEmpty(cancelPaymentRequest.authorizationId))
             {
                 bool isLive = !cancelPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
-                IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+                IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
                 dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
 
                 // If affirmResponse.reference_id is null, assume the payment was never authorized.
@@ -194,7 +199,7 @@
                 }
                 else
                 {
-                    IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+                    IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
                     try
                     {
                         dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId, capturePaymentRequest.value);
@@ -274,13 +279,13 @@
 
             int amount = decimal.ToInt32(refundPaymentRequest.value * 100);
 
-            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
             dynamic affirmResponse = await affirmAPI.RefundAsync(publicKey, privateKey, refundPaymentRequest.authorizationId, amount);
 
             RefundPaymentResponse refundPaymentResponse = new RefundPaymentResponse
             {
                 paymentId = refundPaymentRequest.paymentId,
-                refundId = affirmResponse.reference_id,
+                refundId = affirmResponse.reference_id ?? affirmResponse.id,
                 value = affirmResponse.amount == null ? 0m : (decimal)affirmResponse.amount / 100m,
                 code = affirmResponse.type ?? affirmResponse.Error.Code,
                 message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee_refunded > 0 ? (decimal)affirmResponse.fee_refunded / 100m : 0):F2}" : affirmResponse.Error.Message,
@@ -322,7 +327,7 @@
                 orderId = paymentIdentifier;
             }
 
-            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
             dynamic affirmResponse = await affirmAPI.AuthorizeAsync(publicKey, privateKey, token, orderId);
 
             string paymentStatus = AffirmConstants.Vtex.Denied;
@@ -392,7 +397,7 @@
         public async Task<CreatePaymentResponse> ReadCharge(string paymentId, string publicKey, string privateKey, bool sandboxMode)
         {
             bool isLive = !sandboxMode; // await this.GetIsLiveSetting();
-            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive);
+            IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
             dynamic affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, paymentId);
             //dynamic affirmResponse = await affirmAPI.ReadAsync(publicKey, privateKey, paymentId);
 

@@ -9,20 +9,23 @@
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Vtex.Api.Context;
 
     public class AffirmAPI : IAffirmAPI
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IIOServiceContext _context;
         private string affirmBaseUrl;
         private string katapultBaseUrl;
         private const string APPLICATION_JSON = "application/json";
         private const string HEADER_VTEX_CREDENTIAL = "X-Vtex-Credential";
 
-        public AffirmAPI(IHttpContextAccessor httpContextAccessor, HttpClient httpClient, bool isLive)
+        public AffirmAPI(IHttpContextAccessor httpContextAccessor, HttpClient httpClient, bool isLive, IIOServiceContext context)
         {
             this._httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             this._httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            this._context = context ?? throw new ArgumentNullException(nameof(context));
             string prefix = isLive ? "api" : "sandbox";
             this.affirmBaseUrl = $"http://{prefix}.{AffirmConstants.AffirmUrlStub}/{AffirmConstants.AffirmApiVersion}";
             this.katapultBaseUrl = $"http://{prefix}.{AffirmConstants.KatapultUrlStub}/{AffirmConstants.KatapultApiVersion}";
@@ -269,11 +272,13 @@
                 try
                 {
                     parsedResponse = JObject.Parse(responseContent);
+                    _context.Vtex.Logger.Info("ParseAffirmResponse", null, $"Json:{responseContent}");
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error parsing success response: {ex.Message}");
                     Console.WriteLine($"Response: {responseContent}");
+                    _context.Vtex.Logger.Error("ParseAffirmResponse", null, $"Error Parsing Json Response:{responseContent}", ex);
                 }
             }
             else
@@ -284,11 +289,13 @@
                     doc.LoadXml(responseContent);
                     string json = JsonConvert.SerializeXmlNode(doc);
                     parsedResponse = JObject.Parse(json);
+                    _context.Vtex.Logger.Info("ParseAffirmResponse", null, $"XML:{responseContent}");
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error parsing failure response: {ex.Message}");
                     Console.WriteLine($"Response: {responseContent}");
+                    _context.Vtex.Logger.Error("ParseAffirmResponse", null, $"Error Parsing Failure Response:{responseContent}", ex);
                 }
             }
 

@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ 
+- For Katapult refunds, look up the Discount amount
+
 ## [1.1.19] - 2020-08-25
 
- ### Added
+### Added
  
 - Added logging
 

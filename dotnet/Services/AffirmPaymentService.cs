@@ -269,11 +269,10 @@
         public async Task<RefundPaymentResponse> RefundPayment(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey)
         {
             bool isLive = !refundPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
-
+            CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(refundPaymentRequest.paymentId);
             if (refundPaymentRequest.authorizationId == null)
             {
                 // Get Affirm id from storage
-                CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(refundPaymentRequest.paymentId);
                 refundPaymentRequest.authorizationId = paymentRequest.transactionId;
             }
 
@@ -291,6 +290,24 @@
                 message = affirmResponse.id != null ? $"Id:{affirmResponse.id} Fee={(affirmResponse.fee_refunded > 0 ? (decimal)affirmResponse.fee_refunded / 100m : 0):F2}" : affirmResponse.Error.Message,
                 requestId = refundPaymentRequest.requestId
             };
+
+            if (refundPaymentRequest.authorizationId.StartsWith(AffirmConstants.KatapultIdPrefix))
+            {
+                // Need to get details from Katapult
+                VtexSettings vtexSettings = await _paymentRequestRepository.GetAppSettings();
+                if (vtexSettings.enableKatapult)
+                {
+                    KatapultFunding katapultResponse = await affirmAPI.KatapultFundingAsync(vtexSettings.katapultPrivateToken);
+                    if (katapultResponse != null)
+                    {
+                        FundingObject fundingObject = katapultResponse.FundingReport.FundingObjects.Where(f => f.OrderId.Equals(paymentRequest.orderId)).FirstOrDefault();
+                        if (fundingObject != null)
+                        {
+                            refundPaymentResponse.message = $"Id:{affirmResponse.id} Fee={(fundingObject.Discount):F2}";
+                        }
+                    }
+                }
+            }
 
             return refundPaymentResponse;
         }

@@ -75,6 +75,13 @@
       }
     },
     {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "katapult.com",
+        "path": "/api/v3/*"
+      }
+    },
+    {
       "name": "vbase-read-write"
     }
   ],

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Changed Katapult production url from api.katapult.com to katapult.com
+
 ## [1.1.20] - 2020-08-28
 
 ### Added

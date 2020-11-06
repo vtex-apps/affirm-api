@@ -28,7 +28,14 @@
             this._context = context ?? throw new ArgumentNullException(nameof(context));
             string prefix = isLive ? "api" : "sandbox";
             this.affirmBaseUrl = $"http://{prefix}.{AffirmConstants.AffirmUrlStub}/{AffirmConstants.AffirmApiVersion}";
-            this.katapultBaseUrl = $"http://{prefix}.{AffirmConstants.KatapultUrlStub}/{AffirmConstants.KatapultApiVersion}";
+            if (isLive)
+            {
+                this.katapultBaseUrl = $"http://{AffirmConstants.KatapultUrlStub}/{AffirmConstants.KatapultApiVersion}";
+            }
+            else
+            {
+                this.katapultBaseUrl = $"http://{prefix}.{AffirmConstants.KatapultUrlStub}/{AffirmConstants.KatapultApiVersion}";
+            }
         }
 
         /// <summary>

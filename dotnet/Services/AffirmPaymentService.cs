@@ -241,11 +241,16 @@
                                 VtexSettings vtexSettings = await _paymentRequestRepository.GetAppSettings();
                                 if (vtexSettings.enableKatapult)
                                 {
+                                    capturePaymentResponse.value = affirmResponse.amount == null ? capturePaymentRequest.value : (decimal)affirmResponse.amount / 100m;
                                     KatapultFunding katapultResponse = await affirmAPI.KatapultFundingAsync(vtexSettings.katapultPrivateToken);
                                     if(katapultResponse != null)
                                     {
                                         FundingObject fundingObject = katapultResponse.FundingReport.FundingObjects.Where(f => f.OrderId.Equals(paymentRequest.orderId)).FirstOrDefault();
                                         capturePaymentResponse.message = JsonConvert.SerializeObject(fundingObject);
+                                    }
+                                    else
+                                    {
+                                        _context.Vtex.Logger.Info("CapturePayment", null, $"Katapult Funding Response was null.  [{capturePaymentRequest.authorizationId}]");
                                     }
                                 }
                             }

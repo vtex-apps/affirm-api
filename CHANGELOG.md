@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Default amount field for Katapult orders
+
 ## [1.1.21] - 2020-11-06
 
 ### Changed

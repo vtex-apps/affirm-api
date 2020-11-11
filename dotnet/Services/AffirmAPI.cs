@@ -103,6 +103,8 @@
             request.Headers.Add("X-Vtex-Use-Https", "true");
             request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
 
+            _context.Vtex.Logger.Info("CaptureAsync", null, $"Capture {amount} for {orderId} [{chargeId}]");
+
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
 

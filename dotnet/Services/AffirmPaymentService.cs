@@ -202,7 +202,7 @@
                     IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
                     try
                     {
-                        dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId, capturePaymentRequest.value);
+                        dynamic affirmResponse = await affirmAPI.CaptureAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, paymentRequest.orderId, capturePaymentRequest.value, capturePaymentRequest.transactionId);
                         if (affirmResponse == null)
                         {
                             capturePaymentResponse.message = "Null affirmResponse.";
@@ -340,7 +340,7 @@
         /// <param name="publicKey"></param>
         /// <param name="privateKey"></param>
         /// <returns></returns>
-        public async Task<CreatePaymentResponse> Authorize(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId, bool sandboxMode)
+        public async Task<CreatePaymentResponse> Authorize(string paymentIdentifier, string token, string publicKey, string privateKey, string callbackUrl, int amount, string orderId, bool sandboxMode, string transactionId)
         {
             bool isLive = !sandboxMode; // await this.GetIsLiveSetting();
 
@@ -350,7 +350,7 @@
             }
 
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
-            dynamic affirmResponse = await affirmAPI.AuthorizeAsync(publicKey, privateKey, token, orderId);
+            dynamic affirmResponse = await affirmAPI.AuthorizeAsync(publicKey, privateKey, token, orderId, transactionId);
 
             string paymentStatus = AffirmConstants.Vtex.Denied;
             if (affirmResponse.amount != null && affirmResponse.amount == amount)

@@ -48,7 +48,7 @@
         /// The only two pieces of information you need to parse from this response object are amount and the id.
         /// </summary>
         /// <returns></returns>
-        public async Task<JObject> AuthorizeAsync(string publicApiKey, string privateApiKey, string checkoutToken, string orderId)
+        public async Task<JObject> AuthorizeAsync(string publicApiKey, string privateApiKey, string checkoutToken, string orderId, string transactionId)
         {
             AffirmAuthorizeRequest authRequest = new AffirmAuthorizeRequest
             {
@@ -67,6 +67,7 @@
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
             request.Headers.Add("X-Vtex-Use-Https", "true");
             request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
+            request.Headers.Add("Idempotency-Key", transactionId);
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
@@ -82,7 +83,7 @@
         /// Full or partial refunds can be processed within 120 days
         /// </summary>
         /// <returns></returns>
-        public async Task<JObject> CaptureAsync(string publicApiKey, string privateApiKey, string chargeId, string orderId, decimal amount)
+        public async Task<JObject> CaptureAsync(string publicApiKey, string privateApiKey, string chargeId, string orderId, decimal amount, string transactionId)
         {
             int amountInPennies = (int)(amount * 100);
             AffirmCaptureRequest captureRequest = new AffirmCaptureRequest
@@ -102,6 +103,7 @@
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
             request.Headers.Add("X-Vtex-Use-Https", "true");
             request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
+            request.Headers.Add("Idempotency-Key", transactionId);
 
             _context.Vtex.Logger.Info("CaptureAsync", null, $"Capture {amount} for {orderId} [{chargeId}]");
 

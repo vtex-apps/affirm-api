@@ -20,7 +20,7 @@
         /// The only two pieces of information you need to parse from this response object are amount and the id.
         /// </summary>
         /// <returns></returns>
-        Task<JObject> AuthorizeAsync(string publicApiKey, string privateApiKey, string checkoutToken, string orderId);
+        Task<JObject> AuthorizeAsync(string publicApiKey, string privateApiKey, string checkoutToken, string orderId, string transactionId);
 
         /// <summary>
         /// Read the checkout data and current checkout status for a specific checkout attempt.
@@ -46,7 +46,7 @@
         /// Full or partial refunds can be processed within 120 days
         /// </summary>
         /// <returns></returns>
-        Task<JObject> CaptureAsync(string publicApiKey, string privateApiKey, string chargeId, string orderId, decimal amount);
+        Task<JObject> CaptureAsync(string publicApiKey, string privateApiKey, string chargeId, string orderId, decimal amount, string transactionId);
 
         /// <summary>
         /// Cancel an authorized charge. After voiding a loan:

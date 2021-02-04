@@ -7,14 +7,17 @@
     using Newtonsoft.Json;
     using System;
     using System.Threading.Tasks;
+    using Vtex.Api.Context;
 
     public class RoutesController : Controller
     {
         private readonly IAffirmPaymentService _affirmPaymentService;
+        private readonly IIOServiceContext _context;
 
-        public RoutesController(IAffirmPaymentService affirmPaymentService)
+        public RoutesController(IAffirmPaymentService affirmPaymentService, IIOServiceContext context)
         {
             this._affirmPaymentService = affirmPaymentService ?? throw new ArgumentNullException(nameof(affirmPaymentService));
+            this._context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         /// <summary>
@@ -56,6 +59,7 @@
             else
             {
                 CancelPaymentResponse cancelResponse = await this._affirmPaymentService.CancelPayment(cancelPaymentRequest, publicKey, privateKey);
+                _context.Vtex.Logger.Info("CancelPayment", null, $"{bodyAsText} {JsonConvert.SerializeObject(cancelResponse)}");
 
                 return Json(cancelResponse);
             }
@@ -82,6 +86,7 @@
             else
             {
                 CapturePaymentResponse captureResponse = await this._affirmPaymentService.CapturePayment(capturePaymentRequest, publicKey, privateKey);
+                _context.Vtex.Logger.Info("CapturePayment", null, $"{bodyAsText} {JsonConvert.SerializeObject(captureResponse)}");
 
                 return Json(captureResponse);
             }
@@ -108,6 +113,7 @@
             else
             {
                 RefundPaymentResponse refundResponse = await this._affirmPaymentService.RefundPayment(refundPaymentRequest, publicKey, privateKey);
+                _context.Vtex.Logger.Info("RefundPayment", null, $"{bodyAsText} {JsonConvert.SerializeObject(refundResponse)}");
 
                 return Json(refundResponse);
             }
@@ -148,6 +154,7 @@
             else
             {
                 CreatePaymentResponse paymentResponse = await this._affirmPaymentService.Authorize(paymentIdentifier, token, publicKey, privateKey, callbackUrl, orderTotal, string.Empty, sandboxMode, string.Empty);
+                _context.Vtex.Logger.Info("Authorize", null, $"{paymentIdentifier} {JsonConvert.SerializeObject(paymentResponse)}");
                 Response.Headers.Add("Cache-Control", "private");
 
                 return Json(paymentResponse);
@@ -172,6 +179,7 @@
             else
             {
                 CreatePaymentResponse paymentResponse = await this._affirmPaymentService.ReadCharge(paymentIdentifier, publicKey, privateKey, bool.Parse(sandboxMode));
+                _context.Vtex.Logger.Info("ReadCharge", null, $"{paymentIdentifier} {JsonConvert.SerializeObject(paymentResponse)}");
                 Response.Headers.Add("Cache-Control", "private");
 
                 return Json(paymentResponse);
@@ -190,7 +198,17 @@
             string privateKey = HttpContext.Request.Headers[AffirmConstants.PrivateKeyHeader];
             string publicKey = HttpContext.Request.Headers[AffirmConstants.PublicKeyHeader];
             var bodyAsText = await new System.IO.StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-            InboundRequest inboundRequest = JsonConvert.DeserializeObject<InboundRequest>(bodyAsText);
+            InboundRequest inboundRequest = null;
+            try
+            {
+                inboundRequest = JsonConvert.DeserializeObject<InboundRequest>(bodyAsText);
+            }
+            catch(Exception ex)
+            {
+                responseMessage = ex.Message;
+                _context.Vtex.Logger.Error("Inbound", null, $"Error parsing InboundRequest {bodyAsText}", ex);
+            }
+
             dynamic inboundRequestBody = null;
             try
             {
@@ -199,6 +217,7 @@
             catch(Exception ex)
             {
                 responseMessage = ex.Message;
+                _context.Vtex.Logger.Error("Inbound", null, $"Error parsing InboundRequestBody {bodyAsText}", ex);
             }
 
             paymentId = inboundRequest.paymentId;
@@ -215,49 +234,65 @@
             }
             else
             {
-                switch(actiontype)
+                try
                 {
-                    case AffirmConstants.Inbound.ActionAuthorize:
-                        string token = inboundRequestBody.token;
-                        string callbackUrl = inboundRequestBody.callbackUrl;
-                        int amount = inboundRequestBody.orderTotal;
-                        string orderId = inboundRequestBody.orderId;
-                        bool sandboxMode = inboundRequest.sandboxMode;
-                        string transactionId = inboundRequest.transactionId;
-                        if (string.IsNullOrEmpty(paymentId) || string.IsNullOrEmpty(token) || string.IsNullOrEmpty(callbackUrl))
-                        {
-                            responseStatusCode = StatusCodes.Status400BadRequest.ToString();
-                            responseMessage = "Missing parameters.";
-                        }
-                        else
-                        {
-                            var paymentRequest = await this._affirmPaymentService.Authorize(paymentId, token, publicKey, privateKey, callbackUrl, amount, orderId, sandboxMode, transactionId);
-                            Response.Headers.Add("Cache-Control", "private");
+                    switch (actiontype)
+                    {
+                        case AffirmConstants.Inbound.ActionAuthorize:
+                            string token = inboundRequestBody.token;
+                            string callbackUrl = inboundRequestBody.callbackUrl;
+                            int amount = inboundRequestBody.orderTotal;
+                            string orderId = inboundRequestBody.orderId;
+                            bool sandboxMode = inboundRequest.sandboxMode;
+                            string transactionId = inboundRequest.transactionId;
+                            if (string.IsNullOrEmpty(paymentId) || string.IsNullOrEmpty(token) || string.IsNullOrEmpty(callbackUrl))
+                            {
+                                responseStatusCode = StatusCodes.Status400BadRequest.ToString();
+                                responseMessage = "Missing parameters.";
+                            }
+                            else
+                            {
+                                var paymentRequest = await this._affirmPaymentService.Authorize(paymentId, token, publicKey, privateKey, callbackUrl, amount, orderId, sandboxMode, transactionId);
+                                _context.Vtex.Logger.Info("Inbound", null, $"{paymentId} {JsonConvert.SerializeObject(paymentRequest)}");
+                                Response.Headers.Add("Cache-Control", "private");
 
-                            responseBody = JsonConvert.SerializeObject(paymentRequest);
-                            responseStatusCode = StatusCodes.Status200OK.ToString();
-                        }
+                                responseBody = JsonConvert.SerializeObject(paymentRequest);
+                                responseStatusCode = StatusCodes.Status200OK.ToString();
+                            }
 
-                        break;
-                    default:
-                        responseStatusCode = StatusCodes.Status405MethodNotAllowed.ToString();
-                        responseMessage = $"Action '{actiontype}' is not supported.";
-                        break;
+                            break;
+                        default:
+                            responseStatusCode = StatusCodes.Status405MethodNotAllowed.ToString();
+                            responseMessage = $"Action '{actiontype}' is not supported.";
+                            break;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    _context.Vtex.Logger.Error("Inbound", null, $"Error processing request {bodyAsText}", ex);
                 }
             }
 
-            InboundResponse response = new InboundResponse
+            InboundResponse response = null;
+            try
             {
-                code = responseCode,
-                message = responseMessage,
-                paymentId = paymentId,
-                requestId = requestId,
-                responseData = new ResponseData
+                response = new InboundResponse
                 {
-                    body = responseBody,
-                    statusCode = responseStatusCode
-                }
-            };
+                    code = responseCode,
+                    message = responseMessage,
+                    paymentId = paymentId,
+                    requestId = requestId,
+                    responseData = new ResponseData
+                    {
+                        body = responseBody,
+                        statusCode = responseStatusCode
+                    }
+                };
+            }
+            catch(Exception ex)
+            {
+                _context.Vtex.Logger.Error("Inbound", null, $"Error creating Response {responseBody}", ex);
+            }
 
             return Json(response);
         }

@@ -187,11 +187,8 @@
             }
             else
             {
-                if (capturePaymentRequest.authorizationId == null)
-                {
-                    // Get Affirm id from storage
-                    capturePaymentRequest.authorizationId = paymentRequest.transactionId;
-                }
+                // Get Affirm id from storage
+                capturePaymentRequest.authorizationId = paymentRequest.transactionId;
 
                 if (string.IsNullOrEmpty(capturePaymentRequest.authorizationId))
                 {
@@ -275,11 +272,8 @@
         {
             bool isLive = !refundPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
             CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(refundPaymentRequest.paymentId);
-            if (refundPaymentRequest.authorizationId == null)
-            {
-                // Get Affirm id from storage
-                refundPaymentRequest.authorizationId = paymentRequest.transactionId;
-            }
+            // Get Affirm id from storage
+            refundPaymentRequest.authorizationId = paymentRequest.transactionId;
 
             int amount = decimal.ToInt32(refundPaymentRequest.value * 100);
 

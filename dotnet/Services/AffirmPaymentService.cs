@@ -40,7 +40,7 @@
         public async Task<CreatePaymentResponse> CreatePayment(CreatePaymentRequest createPaymentRequest, string publicKey)
         {
             CreatePaymentResponse paymentResponse = null;
-            paymentResponse = await this._paymentRequestRepository.GetPaymentRequestAsync(createPaymentRequest.paymentId);
+            paymentResponse = await this._paymentRequestRepository.GetPaymentResponseAsync(createPaymentRequest.paymentId);
             if(paymentResponse != null)
             {
                 return paymentResponse;
@@ -114,7 +114,7 @@
 
             //paymentResponse.paymentUrl = $"{siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
 
-            await this._paymentRequestRepository.SavePaymentResponseAsync(paymentResponse.paymentId, paymentResponse);
+            await this._paymentRequestRepository.SavePaymentResponseAsync(paymentResponse);
             
             return paymentResponse;
         }
@@ -417,7 +417,7 @@
             if (!string.IsNullOrEmpty(paymentRequest.transactionId) && !string.IsNullOrEmpty(paymentRequest.orderId))
             {
                 await this._paymentRequestRepository.SavePaymentRequestAsync(paymentIdentifier, paymentRequest);
-                await this._paymentRequestRepository.SavePaymentResponseAsync(paymentResponse.paymentId, paymentResponse);
+                await this._paymentRequestRepository.SavePaymentResponseAsync(paymentResponse);
             }
 
             return paymentResponse;

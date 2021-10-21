@@ -17,6 +17,7 @@
     {
         private const string SETTINGS_NAME = "merchantSettings";
         private const string BUCKET = "paymentRequest";
+        private const string RESPONSE_BUCKET = "paymentResponse";
         private const string HEADER_VTEX_CREDENTIAL = "X-Vtex-Credential";
         private const string HEADER_VTEX_WORKSPACE = "X-Vtex-Workspace";
         private const string HEADER_VTEX_ACCOUNT = "X-Vtex-Account";
@@ -49,7 +50,7 @@
 
         public async Task<CreatePaymentRequest> GetPaymentRequestAsync(string paymentIdentifier)
         {
-            Console.WriteLine($"GetPaymentRequestAsync called with {this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_ACCOUNT]},master,{this._environmentVariableProvider.ApplicationName},{this._environmentVariableProvider.ApplicationVendor},{this._environmentVariableProvider.Region}");
+            // Console.WriteLine($"GetPaymentRequestAsync called with {this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_ACCOUNT]},master,{this._environmentVariableProvider.ApplicationName},{this._environmentVariableProvider.ApplicationVendor},{this._environmentVariableProvider.Region}");
 
             var request = new HttpRequestMessage
             {
@@ -102,6 +103,63 @@
             var response = await _httpClient.SendAsync(request);
 
             response.EnsureSuccessStatusCode();
+        }
+
+        public async Task SavePaymentResponseAsync(CreatePaymentResponse createPaymentResponse)
+        {
+            if (createPaymentResponse == null)
+            {
+                createPaymentResponse = new CreatePaymentResponse();
+            }
+
+            var jsonSerializedCreatePaymentResponse = JsonConvert.SerializeObject(createPaymentResponse);
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Put,
+                RequestUri = new Uri($"http://vbase.{this._environmentVariableProvider.Region}.vtex.io/{this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_ACCOUNT]}/master/buckets/{this._applicationName}/{RESPONSE_BUCKET}/files/{createPaymentResponse.paymentId}"),
+                Content = new StringContent(jsonSerializedCreatePaymentResponse, Encoding.UTF8, APPLICATION_JSON)
+            };
+
+            string authToken = this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL];
+            if (authToken != null)
+            {
+                request.Headers.Add(AUTHORIZATION_HEADER_NAME, authToken);
+            }
+
+            var response = await _httpClient.SendAsync(request);
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task<CreatePaymentResponse> GetPaymentResponseAsync(string paymentId)
+        {
+            // Console.WriteLine($"GetPaymentRequestAsync called with {this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_ACCOUNT]},master,{this._environmentVariableProvider.ApplicationName},{this._environmentVariableProvider.ApplicationVendor},{this._environmentVariableProvider.Region}");
+
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"http://vbase.{this._environmentVariableProvider.Region}.vtex.io/{this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_ACCOUNT]}/master/buckets/{this._applicationName}/{RESPONSE_BUCKET}/files/{paymentId}"),
+            };
+
+            string authToken = this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL];
+            if (authToken != null)
+            {
+                request.Headers.Add(AUTHORIZATION_HEADER_NAME, authToken);
+            }
+
+            var response = await _httpClient.SendAsync(request);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+
+            // A helper method is in order for this as it does not return the stack trace etc.
+            response.EnsureSuccessStatusCode();
+
+            CreatePaymentResponse paymentResponse =  JsonConvert.DeserializeObject<CreatePaymentResponse>(responseContent);
+            return paymentResponse;
         }
 
         public async Task<MerchantSettings> GetMerchantSettings()

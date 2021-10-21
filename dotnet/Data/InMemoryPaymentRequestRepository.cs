@@ -7,6 +7,7 @@
     public class InMemoryPaymentRequestRepository : IPaymentRequestRepository
     {
         private readonly IDictionary<string, CreatePaymentRequest> _inMemoryDataStore = new Dictionary<string, CreatePaymentRequest>();
+        private readonly IDictionary<string, CreatePaymentResponse> _inMemoryDataStoreResponse = new Dictionary<string, CreatePaymentResponse>();
         private readonly IDictionary<string, MerchantSettings> _inMemorySettings = new Dictionary<string, MerchantSettings>();
 
         public InMemoryPaymentRequestRepository()
@@ -29,6 +30,23 @@
             this._inMemoryDataStore.Remove(paymentIdentifier);
             this._inMemoryDataStore.Add(paymentIdentifier, createPaymentRequest);
             return Task.CompletedTask;
+        }
+
+        public Task SavePaymentResponseAsync(CreatePaymentResponse createPaymentResponse)
+        {
+            this._inMemoryDataStoreResponse.Remove(createPaymentResponse.paymentId);
+            this._inMemoryDataStoreResponse.Add(createPaymentResponse.paymentId, createPaymentResponse);
+            return Task.CompletedTask;
+        }
+
+         public Task<CreatePaymentResponse> GetPaymentResponseAsync(string paymentId)
+        {
+            if (!this._inMemoryDataStoreResponse.TryGetValue(paymentId, out var paymentResponse))
+            {
+                return Task.FromResult((CreatePaymentResponse)null);
+            }
+
+            return Task.FromResult(paymentResponse);
         }
 
         public Task SetMerchantSettings(MerchantSettings merchantSettings)

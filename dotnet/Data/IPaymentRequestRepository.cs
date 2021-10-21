@@ -7,6 +7,10 @@
     {
         Task<CreatePaymentRequest> GetPaymentRequestAsync(string paymentIdentifier);
 
+        Task SavePaymentResponseAsync(CreatePaymentResponse createPaymentResponse);
+
+        Task<CreatePaymentResponse> GetPaymentResponseAsync(string paymentId);
+
         Task SavePaymentRequestAsync(string paymentIdentifier, CreatePaymentRequest createPaymentRequest);
 
         Task SetMerchantSettings(MerchantSettings merchantSettings);

@@ -2,6 +2,8 @@
 # Affirm API
 See documentation for [Affirm Payment](https://github.com/vtex-apps/affirm-payment).
 
+NOTE: Currently we do not support a marketplace situation, where the seller processes the payment
+
 **Upcoming documentation:**
 
  - [Update service.json](https://github.com/vtex-apps/affirm-api/pull/5)

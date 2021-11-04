@@ -270,6 +270,7 @@
             if(response.IsSuccessStatusCode)
             {
                 katapultFunding = JsonConvert.DeserializeObject<KatapultFunding>(responseContent);
+                _context.Vtex.Logger.Info("KatapultFunding", null, $"Json:{responseContent}");
             }
 
             return katapultFunding;
@@ -314,5 +315,10 @@
 
             return parsedResponse;
         }
-    }
+
+		public Task<dynamic> AuthorizeAsync(string publicKey, string privateKey, string v1, string v2)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

@@ -1,4 +1,4 @@
-﻿namespace Affirm.Services
+namespace Affirm.Services
 {
     using Affirm.Data;
     using Affirm.Models;
@@ -48,6 +48,8 @@
                 {
                     paymentResponse.status = AffirmConstants.Vtex.Denied;
                 }
+
+                _context.Vtex.Logger.Info("CreatePaymentResponse", null, $"PaymentResponse: {paymentResponse}");
                 return paymentResponse;
             }
             else
@@ -62,7 +64,6 @@
             paymentResponse.paymentId = createPaymentRequest.paymentId;
             paymentResponse.status = AffirmConstants.Vtex.Undefined;
             // paymentResponse.tid = createPaymentRequest.reference; // Using reference because we don't have an identifier from the provider yet.
-            string redirectUrl = AffirmConstants.RedirectUrl;
             string siteHostSuffix = string.Empty;
             //paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
             paymentResponse.paymentAppData = new PaymentAppData
@@ -145,6 +146,7 @@
             if (paymentRequest == null)
             {
                 cancelPaymentResponse.message = $"Could not load Payment Request for Payment Id {cancelPaymentRequest.paymentId}.";
+                _context.Vtex.Logger.Warn("CancelPayment", null, $"Could not load Payment Request for Payment Id: {cancelPaymentRequest.paymentId}");
             }
             else
             {
@@ -201,6 +203,7 @@
             if (paymentRequest == null)
             {
                 capturePaymentResponse.message = "Could not load Payment Request.";
+                _context.Vtex.Logger.Info("CapturePayment", null, $"{capturePaymentResponse.message}");
             }
             else
             {
@@ -220,6 +223,7 @@
                         if (affirmResponse == null)
                         {
                             capturePaymentResponse.message = "Null affirmResponse.";
+                            _context.Vtex.Logger.Warn("CapturePaymentResponse", null, $"{capturePaymentResponse.message}");
                         }
                         else
                         {
@@ -261,6 +265,7 @@
                                     {
                                         FundingObject fundingObject = katapultResponse.FundingReport.FundingObjects.Where(f => f.OrderId.Equals(paymentRequest.orderId)).FirstOrDefault();
                                         capturePaymentResponse.message = JsonConvert.SerializeObject(fundingObject);
+                                        _context.Vtex.Logger.Info("CapturePayment", null, $"Katapult Funding Response  {capturePaymentResponse.message}");
                                     }
                                     else
                                     {
@@ -272,6 +277,7 @@
                     }
                     catch (Exception ex)
                     {
+                        _context.Vtex.Logger.Error("CapturePaymentAsync", null, $"CapturePaymentResponse:{ex.Message}", ex);
                         capturePaymentResponse.message = $"CapturePaymentAsync Error: {ex.Message}";
                     };
                 }
@@ -320,6 +326,7 @@
                         if (fundingObject != null)
                         {
                             refundPaymentResponse.message = $"Id:{affirmResponse.id} Fee={(fundingObject.Discount):F2}";
+                            _context.Vtex.Logger.Info("RefundPayment", null, $"RefundPayment {refundPaymentResponse}");
                         }
                     }
                 }
@@ -367,6 +374,7 @@
             if (affirmResponse.amount != null && affirmResponse.amount == amount)
             {
                 paymentStatus = AffirmConstants.Vtex.Approved;
+                _context.Vtex.Logger.Info("CreatePaymentResponse", null, $"PaymentResponse: {paymentStatus}");
             }
             else //if (affirmResponse.status_code != null && affirmResponse.status_code == StatusCodes.Status403Forbidden.ToString() && affirmResponse.code != null && affirmResponse.code == AffirmConstants.TokenUsed)
             {
@@ -377,6 +385,7 @@
                     if (affirmResponse.status != null && affirmResponse.status == AffirmConstants.SuccessResponseCode)
                     {
                         paymentStatus = AffirmConstants.Vtex.Approved;
+                        _context.Vtex.Logger.Info("CreatePaymentResponse", null, $"PaymentResponse: {paymentStatus}");
                     }
                 }
             }
@@ -407,6 +416,7 @@
             }
 
             paymentResponse.message = message;
+            _context.Vtex.Logger.Info("PaymentResponse", null, $"PaymentResponse: {paymentResponse.message}");
 
             // Save the Affirm id & order number - will need for capture
             CreatePaymentRequest paymentRequest = new CreatePaymentRequest

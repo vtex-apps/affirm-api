@@ -118,7 +118,6 @@ namespace UnitTests
         public async Task FundingTestMethod()
         {
             string katapultPrivate = " ";
-            string katapultPublic = " ";
             string ordernumber = "1033711204843";
 
             IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false, null);

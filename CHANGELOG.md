@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Change order of postCallBackResponse
+- Update logs for err and info
+
 ## [1.3.0] - 2021-10-21
 
 ### Added

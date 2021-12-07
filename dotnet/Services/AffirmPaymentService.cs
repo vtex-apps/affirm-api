@@ -368,7 +368,6 @@
                 if (affirmResponse.charge_id != null || affirmResponse.reference_id != null)
                 {
                     string chargeId = affirmResponse.charge_id ?? affirmResponse.reference_id;
-                    _context.Vtex.Logger.Info($"Getting current status for {chargeId}");
                     affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, chargeId);
                     if (affirmResponse.status != null && affirmResponse.status == AffirmConstants.SuccessResponseCode)
                     {

@@ -188,7 +188,7 @@
 
         public async Task<IActionResult> Inbound(string paymentId, string actiontype)
         {
-            Console.WriteLine($"InboundAsync action = {actiontype}");
+            _context.Vtex.Logger.Info($"InboundAsync action = {actiontype}");
 
             string responseCode = string.Empty;
             string responseMessage = string.Empty;

@@ -368,7 +368,7 @@
                 if (affirmResponse.charge_id != null || affirmResponse.reference_id != null)
                 {
                     string chargeId = affirmResponse.charge_id ?? affirmResponse.reference_id;
-                    Console.WriteLine($"Getting current status for {chargeId}");
+                    _context.Vtex.Logger.Info($"Getting current status for {chargeId}");
                     affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, chargeId);
                     if (affirmResponse.status != null && affirmResponse.status == AffirmConstants.SuccessResponseCode)
                     {
@@ -404,8 +404,6 @@
 
             paymentResponse.message = message;
 
-            await this._paymentRequestRepository.PostCallbackResponse(callbackUrl, paymentResponse);
-
             // Save the Affirm id & order number - will need for capture
             CreatePaymentRequest paymentRequest = new CreatePaymentRequest
             {
@@ -419,6 +417,8 @@
                 await this._paymentRequestRepository.SavePaymentRequestAsync(paymentIdentifier, paymentRequest);
                 await this._paymentRequestRepository.SavePaymentResponseAsync(paymentResponse);
             }
+
+            await this._paymentRequestRepository.PostCallbackResponse(callbackUrl, paymentResponse);
 
             return paymentResponse;
         }

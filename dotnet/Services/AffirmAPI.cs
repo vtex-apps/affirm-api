@@ -310,7 +310,7 @@
                 }
             }
 
-            Console.WriteLine($"Parsed Response = {parsedResponse}");
+            _context.Vtex.Logger.Info($"Parsed Response = {parsedResponse}");
 
             return parsedResponse;
         }

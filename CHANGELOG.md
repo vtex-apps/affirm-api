@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.3.2] - 2021-12-10
+
 ### Fixed
 
 - Authorization retries will be denied if stored payment status is "undefined", to ensure that users who close the Affirm modal are not redirected to the "order placed" page

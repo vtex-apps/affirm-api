@@ -6,9 +6,7 @@
   "description": "An implementation of Affirm",
   "categories": [],
   "settingsSchema": {},
-  "registries": [
-    "smartcheckout"
-  ],
+  "registries": ["smartcheckout"],
   "builders": {
     "dotnet": "2.x"
   },

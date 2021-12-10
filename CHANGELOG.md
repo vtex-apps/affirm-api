@@ -7,15 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Authorization retries will be denied if stored payment status is "undefined", to ensure that users who close the Affirm modal are not redirected to the "order placed" page
+
 ## [1.3.1] - 2021-12-09
 
 ### Fixed
+
 - Change order of postCallBackResponse
 - Update logs for err and info
 
 ## [1.3.0] - 2021-10-21
 
 ### Added
+
 - Save createPaymentResponse
 - Add createSavePaymentResponse Repository
 
@@ -28,13 +34,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.2.1] - 2021-02-04
 
 ### Added
- 
+
 - Logging
 
 ## [1.2.0] - 2021-01-29
 
 ### Added
- 
+
 - Added idempotency key
 
 ## [1.1.22] - 2020-11-11
@@ -52,13 +58,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.1.20] - 2020-08-28
 
 ### Added
- 
+
 - For Katapult refunds, look up the Discount amount
 
 ## [1.1.19] - 2020-08-25
 
 ### Added
- 
+
 - Added logging
 
 ## [1.1.18] - 2020-08-25
@@ -74,13 +80,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Proxy header
 
 ### Added
- 
+
 - Katapult urls to outbound access
 
 ## [1.1.16] - 2020-06-17
 
- ### Added
- 
+### Added
+
 - Get Katapult funding information
 
 ## [1.1.15] - 2020-06-10
@@ -88,9 +94,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - Capture bugfix
- 
- ### Added
- 
+
+### Added
+
 - Adding support for Katapult funding
 
 ## [1.1.14] - 2020-06-02
@@ -152,7 +158,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - Support for new `orderId` field in PaymentRequest object
-- Support for payment cancellations triggered through gateway by frontend 
+- Support for payment cancellations triggered through gateway by frontend
 - Use `vtex.affirm-payment` appSettings `isLive` boolean to determine whether transaction is live or sandbox
 
 ## [0.1.0] - 2019-08-06

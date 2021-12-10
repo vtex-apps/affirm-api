@@ -41,8 +41,13 @@
         {
             CreatePaymentResponse paymentResponse = null;
             paymentResponse = await this._paymentRequestRepository.GetPaymentResponseAsync(createPaymentRequest.paymentId);
-            if(paymentResponse != null)
+            if (paymentResponse != null)
             {
+                // If this is a retry, a stored payment with undefined status should be treated as denied
+                if (paymentResponse.status == AffirmConstants.Vtex.Undefined)
+                {
+                    paymentResponse.status = AffirmConstants.Vtex.Denied;
+                }
                 return paymentResponse;
             }
             else
@@ -115,7 +120,7 @@
             //paymentResponse.paymentUrl = $"{siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
 
             await this._paymentRequestRepository.SavePaymentResponseAsync(paymentResponse);
-            
+
             return paymentResponse;
         }
 
@@ -145,8 +150,8 @@
             {
                 //if (cancelPaymentRequest.authorizationId == null)
                 //{
-                    // Get Affirm id from storage
-                    cancelPaymentRequest.authorizationId = paymentRequest.transactionId;
+                // Get Affirm id from storage
+                cancelPaymentRequest.authorizationId = paymentRequest.transactionId;
                 //}
             }
 
@@ -252,7 +257,7 @@
                                 {
                                     capturePaymentResponse.value = affirmResponse.amount == null ? capturePaymentRequest.value : (decimal)affirmResponse.amount / 100m;
                                     KatapultFunding katapultResponse = await affirmAPI.KatapultFundingAsync(vtexSettings.katapultPrivateToken);
-                                    if(katapultResponse != null)
+                                    if (katapultResponse != null)
                                     {
                                         FundingObject fundingObject = katapultResponse.FundingReport.FundingObjects.Where(f => f.OrderId.Equals(paymentRequest.orderId)).FirstOrDefault();
                                         capturePaymentResponse.message = JsonConvert.SerializeObject(fundingObject);
@@ -396,7 +401,7 @@
                 message = affirmResponse.Error.Message;
             }
 
-            if(affirmResponse.fields != null)
+            if (affirmResponse.fields != null)
             {
                 message = $"{message}: {affirmResponse.fields}";
             }

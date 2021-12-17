@@ -315,10 +315,5 @@
 
             return parsedResponse;
         }
-
-		public Task<dynamic> AuthorizeAsync(string publicKey, string privateKey, string v1, string v2)
-		{
-			throw new NotImplementedException();
-		}
 	}
 }

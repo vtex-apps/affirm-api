@@ -9,6 +9,7 @@
     using Affirm.Services;
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
+    using Vtex.Api.Context;
 
     /// <summary>
     /// Concrete implementation of <see cref="IPaymentRequestRepository"/> for persisting data to/from vbase.
@@ -28,9 +29,10 @@
         private readonly HttpClient _httpClient;
         private readonly string _applicationName;
         private string AUTHORIZATION_HEADER_NAME;
+        private readonly IIOServiceContext _context;
 
 
-        public PaymentRequestRepository(IVtexEnvironmentVariableProvider environmentVariableProvider, IHttpContextAccessor httpContextAccessor, HttpClient httpClient)
+        public PaymentRequestRepository(IVtexEnvironmentVariableProvider environmentVariableProvider, IHttpContextAccessor httpContextAccessor, HttpClient httpClient, IIOServiceContext context)
         {
             this._environmentVariableProvider = environmentVariableProvider ??
                                                 throw new ArgumentNullException(nameof(environmentVariableProvider));
@@ -43,6 +45,9 @@
 
             this._applicationName =
                 $"{this._environmentVariableProvider.ApplicationVendor}.{this._environmentVariableProvider.ApplicationName}";
+
+            this._context = context ??
+                throw new ArgumentNullException(nameof(context));
 
             AUTHORIZATION_HEADER_NAME = "Authorization";
         }
@@ -238,7 +243,7 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"PostCallbackResponse {callbackUrl} Error: {ex.Message} InnerException: {ex.InnerException} StackTrace: {ex.StackTrace}");
+                _context.Vtex.Logger.Error("PostCallBackResponse", null, $"PostCallbackResponse {callbackUrl} Error: {ex.Message} InnerException: {ex.InnerException} StackTrace: {ex.StackTrace}", ex);
             }
 
             response.EnsureSuccessStatusCode();

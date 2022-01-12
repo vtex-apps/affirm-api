@@ -17,12 +17,22 @@
             throw new System.NotImplementedException();
         }
 
+        public Task<CreatePaymentResponse> GetPaymentResponseAsync(string paymentId)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public Task PostCallbackResponse(string callbackUrl, CreatePaymentResponse createPaymentResponse)
         {
             throw new System.NotImplementedException();
         }
 
         public Task SavePaymentRequestAsync(string paymentIdentifier, CreatePaymentRequest createPaymentRequest)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task SavePaymentResponseAsync(CreatePaymentResponse createPaymentResponse)
         {
             throw new System.NotImplementedException();
         }

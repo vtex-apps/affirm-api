@@ -1,9 +1,14 @@
 name: '[QE] SonarCloud'
+
 on:
   push:
     branches:
       - master
       - main
+      - release/*
+      - feature/*
+      - fix/*
+      - chore/*
       
   pull_request:
     types: [opened, synchronize, reopened]

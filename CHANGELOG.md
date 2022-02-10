@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Add minimum `delayToCancel` in CreatePayment response to ensure users have enough time to complete modal before authorization retry is sent
+- Log warning when authorization retry results in payment denial
+
 ### Added
 
 - SonarCloud analysis on specific branches and PR's
@@ -14,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.3.3] - 2022-01-05
 
 ### Added
+
 - Added further splunk logs
 
 ## [1.3.2] - 2021-12-10

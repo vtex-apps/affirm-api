@@ -42,6 +42,8 @@ namespace Affirm.Services
 
         public const string AlreadyCaptured = "already_captured";
 
+        public const int MinimumDelayToCancel = 3600;
+
         public class Inbound
         {
             public const string ActionAuthorize = "auth";

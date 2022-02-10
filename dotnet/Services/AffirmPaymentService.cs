@@ -1,10 +1,11 @@
-namespace Affirm.Services
+﻿namespace Affirm.Services
 {
     using Affirm.Data;
     using Affirm.Models;
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
@@ -49,7 +50,14 @@ namespace Affirm.Services
                     paymentResponse.status = AffirmConstants.Vtex.Denied;
                 }
 
-                _context.Vtex.Logger.Info("CreatePaymentResponse", null, $"PaymentResponse: {paymentResponse}");
+                List<(string, string)> log = new List<(string, string)>()
+                {
+                ( "paymentId", paymentResponse.paymentId ),
+                ( "tid", paymentResponse.tid ),
+                };
+
+                // Lots of these warnings in an account indicate that delayToCancel is too short
+                _context.Vtex.Logger.Warn("CreatePaymentResponse", null, "paymentDeniedOnRetry", log.ToArray());
                 return paymentResponse;
             }
             else
@@ -63,21 +71,20 @@ namespace Affirm.Services
             await this._paymentRequestRepository.SavePaymentRequestAsync(paymentIdentifier, createPaymentRequest);
             paymentResponse.paymentId = createPaymentRequest.paymentId;
             paymentResponse.status = AffirmConstants.Vtex.Undefined;
-            // paymentResponse.tid = createPaymentRequest.reference; // Using reference because we don't have an identifier from the provider yet.
             string siteHostSuffix = string.Empty;
-            //paymentResponse.paymentUrl = $"{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
             paymentResponse.paymentAppData = new PaymentAppData
             {
                 appName = AffirmConstants.PaymentFlowAppName,
                 payload = JsonConvert.SerializeObject(new Payload
                 {
-                    //inboundRequestsUrl = createPaymentRequest.inboundRequestsUrl,
-                    //callbackUrl = createPaymentRequest.callbackUrl,
                     paymentIdentifier = paymentIdentifier,
                     publicKey = publicKey,
                     sandboxMode = createPaymentRequest.sandboxMode
                 })
             };
+
+            // Set minimum delayToCancel so that automatic authorization retry isn't sent before user completes modal
+            paymentResponse.delayToCancel = AffirmConstants.MinimumDelayToCancel;
 
             // Load delay settings
             VtexSettings vtexSettings = await this._paymentRequestRepository.GetAppSettings();
@@ -101,24 +108,16 @@ namespace Affirm.Services
 
                     paymentResponse.delayToAutoSettle = vtexSettings.delayToAutoSettle * multiple;
                     paymentResponse.delayToAutoSettleAfterAntifraud = vtexSettings.delayToAutoSettleAfterAntifraud * multiple;
-                    paymentResponse.delayToCancel = vtexSettings.delayToCancel * multiple;
+
+                    int delayToCancelSetting = vtexSettings.delayToCancel * multiple;
+                    if (delayToCancelSetting > AffirmConstants.MinimumDelayToCancel)
+                    {
+                        paymentResponse.delayToCancel = delayToCancelSetting;
+                    }
                 }
 
                 siteHostSuffix = vtexSettings.siteHostSuffix;
-                //paymentResponse.paymentUrl = $"{vtexSettings.siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
             }
-
-            // x-vtex-root-path
-            //if (string.IsNullOrEmpty(siteHostSuffix))
-            //{
-            //    siteHostSuffix = _httpContextAccessor.HttpContext.Request.Headers["x-vtex-root-path"].ToString();
-            //    //if (!string.IsNullOrEmpty(siteHostSuffix))
-            //    //{
-            //    //    Console.WriteLine($"Setting Root Path as {siteHostSuffix}");
-            //    //}
-            //}
-
-            //paymentResponse.paymentUrl = $"{siteHostSuffix}{redirectUrl}?g={paymentIdentifier}&k={publicKey}";
 
             await this._paymentRequestRepository.SavePaymentResponseAsync(paymentResponse);
 
@@ -150,11 +149,8 @@ namespace Affirm.Services
             }
             else
             {
-                //if (cancelPaymentRequest.authorizationId == null)
-                //{
                 // Get Affirm id from storage
                 cancelPaymentRequest.authorizationId = paymentRequest.transactionId;
-                //}
             }
 
             if (!string.IsNullOrEmpty(cancelPaymentRequest.authorizationId))
@@ -442,7 +438,6 @@ namespace Affirm.Services
             bool isLive = !sandboxMode; // await this.GetIsLiveSetting();
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
             dynamic affirmResponse = await affirmAPI.ReadChargeAsync(publicKey, privateKey, paymentId);
-            //dynamic affirmResponse = await affirmAPI.ReadAsync(publicKey, privateKey, paymentId);
 
             return affirmResponse;
         }

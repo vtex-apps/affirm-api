@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.3.4] - 2022-02-10
+
 ### Fixed
 
 - Add minimum `delayToCancel` in CreatePayment response to ensure users have enough time to complete modal before authorization retry is sent

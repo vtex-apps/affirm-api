@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Set recommended `service.json` values including maximum `ttl` of 60 minutes
+
 ## [1.3.4] - 2022-02-10
 
 ### Fixed

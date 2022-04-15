@@ -1,8 +1,12 @@
 {
   "stack": "dotnet",
   "memory": 256,
-  "runtimeArgs": [
-  ],
+  "ttl": 60,
+  "timeout": 20,
+  "minReplicas": 2,
+  "maxReplicas": 4,
+  "workers": 1,
+  "runtimeArgs": [],
   "routes": {
     "printHeaders": {
       "path": "/affirm/print-headers",
@@ -48,7 +52,7 @@
   "events": {
     "onAppsLinked": {
       "sender": "apps",
-      "keys": [ "linked" ]
+      "keys": ["linked"]
     }
   }
 }

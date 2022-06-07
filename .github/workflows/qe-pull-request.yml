@@ -16,8 +16,6 @@ jobs:
     name: QE
     uses: vtex-apps/usqa/.github/workflows/quality-engineering.yml@main
     with:
-      danger: true
-      dangerRequireChangelog: false
       dotnetSonar: true
       dotnetSonarProjectKey: vtex-apps_affirm-api
       dotnetSonarOrganization: vtex-apps

@@ -1,0 +1,21 @@
+name: '[PRT] Quality Engineering'
+
+on:
+  pull_request_target:
+    branches:
+      - main
+      - master
+    types:
+      - labeled
+
+jobs:
+  quality-engineering:
+    name: QE
+    uses: vtex-apps/usqa/.github/workflows/quality-engineering.yml@main
+    with:
+      dotnetSonar: true
+      dotnetSonarProjectKey: vtex-apps_affirm-api
+      dotnetSonarOrganization: vtex-apps
+    secrets:
+      githubToken: ${{ secrets.GITHUB_TOKEN }}
+      sonarToken: ${{ secrets.SONAR_TOKEN }}

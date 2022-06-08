@@ -1,0 +1,24 @@
+name: '[PRN] Quality Engineering'
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+jobs:
+  quality-engineering:
+    name: QE
+    uses: vtex-apps/usqa/.github/workflows/quality-engineering.yml@main
+    with:
+      dotnetSonar: true
+      dotnetSonarProjectKey: vtex-apps_affirm-api
+      dotnetSonarOrganization: vtex-apps
+    secrets:
+      githubToken: ${{ secrets.GITHUB_TOKEN }}
+      sonarToken: ${{ secrets.SONAR_TOKEN }}

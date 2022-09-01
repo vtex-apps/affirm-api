@@ -22,6 +22,8 @@ jobs:
       dotnetSonar: true
       dotnetSonarProjectKey: vtex-apps_affirm-api
       dotnetSonarOrganization: vtex-apps
+      cypress: true
     secrets:
       githubToken: ${{ secrets.GITHUB_TOKEN }}
       sonarToken: ${{ secrets.SONAR_TOKEN }}
+      cypressJson: ${{ secrets.VTEX_QE }}

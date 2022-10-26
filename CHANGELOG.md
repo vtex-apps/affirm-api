@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Updated
 
+- Selectors in affirm payment flow got changed. So, we need to update the selectors in cypress
+
+### Updated
+
 - Reusable workflow updated to version 2
 
 ## [1.3.5] - 2022-04-15

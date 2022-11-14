@@ -11,5 +11,6 @@ namespace Affirm.Models
         public string paymentIdentifier { get; set; }
         public string publicKey { get; set; }
         public bool sandboxMode { get; set; }
+        public string account { get; set; }
     }
 }

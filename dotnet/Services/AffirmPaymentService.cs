@@ -79,7 +79,8 @@
                 {
                     paymentIdentifier = paymentIdentifier,
                     publicKey = publicKey,
-                    sandboxMode = createPaymentRequest.sandboxMode
+                    sandboxMode = createPaymentRequest.sandboxMode,
+                    account = _context.Vtex.Account
                 })
             };
 

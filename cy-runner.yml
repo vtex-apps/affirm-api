@@ -35,8 +35,8 @@ base:
     maxJobs: 2
     quiet: true
     projectId: c9idx1
-    video: false
-    videoCompression: false
+    video: true
+    videoCompression: 40
     videoUploadOnPasses: false
     screenshotOnRunFailure: true
     trashAssetsBeforeRuns: false

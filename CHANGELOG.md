@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Cypress cy-runner.yml updated
+
 ### Updated
 
 - Reusable workflow updated to version 2

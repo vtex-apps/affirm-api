@@ -240,13 +240,16 @@
                 }
 
                 response = await _httpClient.SendAsync(request);
+                if(!response.IsSuccessStatusCode)
+                {
+                    _context.Vtex.Logger.Error("PostCallBackResponse", null, $"PostCallbackResponse {callbackUrl} Failed. [{response.StatusCode}] '{response.Content}' ", null);
+
+                }
             }
             catch (Exception ex)
             {
-                _context.Vtex.Logger.Error("PostCallBackResponse", null, $"PostCallbackResponse {callbackUrl} Error: {ex.Message} InnerException: {ex.InnerException} StackTrace: {ex.StackTrace}", ex);
+                _context.Vtex.Logger.Error("PostCallBackResponse", null, $"PostCallbackResponse {callbackUrl} Error", ex);
             }
-
-            response.EnsureSuccessStatusCode();
         }
 
         public async Task<VtexSettings> GetAppSettings()

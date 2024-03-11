@@ -94,7 +94,7 @@ namespace UnitTests
         public async Task TestMethod3()
         {
             IAffirmAPI affirmAPI = new AffirmAPI(contextAccessor, httpClient, false, null);
-            dynamic response = await affirmAPI.AuthorizeAsync(publicKey, privateKey, "U5LL34ABTDS8A7DM", "1023171562818");
+            dynamic response = await affirmAPI.AuthorizeAsync(publicKey, privateKey, "U5LL34ABTDS8A7DM", "1023171562818", "");
             if (response != null)
             {
                 //response = GetDynamicValue("?xml", response);

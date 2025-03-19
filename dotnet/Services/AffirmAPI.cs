@@ -167,7 +167,7 @@
         /// Refund a charge. (add link to refund info)
         /// </summary>
         /// <returns></returns>
-        public async Task<JObject> RefundAsync(string publicApiKey, string privateApiKey, string chargeId, int amount)
+        public async Task<JObject> RefundAsync(string publicApiKey, string privateApiKey, string chargeId, int amount, string transactionId)
         {
             AffirmRefundRequest refundRequest = new AffirmRefundRequest
             {
@@ -185,6 +185,7 @@
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
             request.Headers.Add("X-Vtex-Use-Https", "true");
             request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
+            request.Headers.Add("Idempotency-Key", transactionId);
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
@@ -230,7 +231,7 @@
         /// The customer receives a notice that the transaction is canceled
         /// </summary>
         /// <returns></returns>
-        public async Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId)
+        public async Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId, string transactionId)
         {
             var request = new HttpRequestMessage
             {
@@ -241,6 +242,7 @@
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
             request.Headers.Add("X-Vtex-Use-Https", "true");
             request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
+            request.Headers.Add("Idempotency-Key", transactionId);
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();

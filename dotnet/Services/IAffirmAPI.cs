@@ -54,7 +54,7 @@
         /// The customer receives a notice that the transaction is canceled
         /// </summary>
         /// <returns></returns>
-        Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId, string transactionId);
+        Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId);
 
         /// <summary>
         /// Cancel the given authorized charge (voidAmount). After voiding a loan:
@@ -62,13 +62,13 @@
         /// The customer receives a notice that the transaction is canceled
         /// </summary>
         /// <returns></returns>
-        Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId, string transactionId, int voidAmount);
+        Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId, int voidAmount);
 
         /// <summary>
         /// Refund a charge. (add link to refund info)
         /// </summary>
         /// <returns></returns>
-        Task<JObject> RefundAsync(string publicApiKey, string privateApiKey, string chargeId, int amount, string transactionId);
+        Task<JObject> RefundAsync(string publicApiKey, string privateApiKey, string chargeId, int amount);
 
         /// <summary>
         /// Update a charge with new fulfillment or order information, such as shipment tracking number, shipping carrier, or order ID.

@@ -157,7 +157,7 @@
             {
                 bool isLive = !cancelPaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
                 IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
-                dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId, cancelPaymentRequest.transactionId);
+                dynamic affirmResponse = await affirmAPI.VoidAsync(publicKey, privateKey, cancelPaymentRequest.authorizationId);
 
                 // If affirmResponse.reference_id is null, assume the payment was never authorized.
                 // TODO: Make a call to 'Read' to get token status.
@@ -200,7 +200,7 @@
             {
                 bool isLive = !capturePaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
                 IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
-                dynamic response = await affirmAPI.VoidAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, capturePaymentRequest.transactionId, voidAmount);
+                dynamic response = await affirmAPI.VoidAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, voidAmount);
                 if (response != null) 
                 {
                     string jsonResponse = JsonConvert.SerializeObject(response);
@@ -327,7 +327,7 @@
             int amount = decimal.ToInt32(refundPaymentRequest.value * 100);
 
             IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
-            dynamic affirmResponse = await affirmAPI.RefundAsync(publicKey, privateKey, refundPaymentRequest.authorizationId, amount, refundPaymentRequest.transactionId);
+            dynamic affirmResponse = await affirmAPI.RefundAsync(publicKey, privateKey, refundPaymentRequest.authorizationId, amount);
 
             RefundPaymentResponse refundPaymentResponse = new RefundPaymentResponse
             {

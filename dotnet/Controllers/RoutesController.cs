@@ -91,7 +91,7 @@
                 _context.Vtex.Logger.Info("CapturePayment", null, $"{bodyAsText} {JsonConvert.SerializeObject(captureResponse)}");
 
                 //Check if partial cancellation feature is enabled and void the amount if items are cancelled
-                await DoPartialCancellation(capturePaymentRequest, publicKey, paymentId);
+                await DoPartialCancellation(capturePaymentRequest, publicKey, privateKey);
 
                 return Json(captureResponse);
             }
@@ -100,8 +100,8 @@
         private async Task DoPartialCancellation(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey)
         {
             // Check if partial cancellation feature is enabled
-            bool isPartialCancellationEnabled = await _vtexTransactionService.isPartialCancellationEnabled();
-            isPartialCancellationEnabled = true;
+            //bool isPartialCancellationEnabled = await _vtexTransactionService.isPartialCancellationEnabled();
+            bool isPartialCancellationEnabled = true;
             if (isPartialCancellationEnabled)
             {
                 Console.WriteLine("isPartialCancellationEnabled : " + isPartialCancellationEnabled);

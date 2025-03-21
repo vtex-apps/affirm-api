@@ -167,7 +167,7 @@
         /// Refund a charge. (add link to refund info)
         /// </summary>
         /// <returns></returns>
-        public async Task<JObject> RefundAsync(string publicApiKey, string privateApiKey, string chargeId, int amount, string transactionId)
+        public async Task<JObject> RefundAsync(string publicApiKey, string privateApiKey, string chargeId, int amount)
         {
             AffirmRefundRequest refundRequest = new AffirmRefundRequest
             {
@@ -185,7 +185,7 @@
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
             request.Headers.Add("X-Vtex-Use-Https", "true");
             request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
-            request.Headers.Add("Idempotency-Key", transactionId);
+            request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
@@ -231,7 +231,7 @@
         /// The customer receives a notice that the transaction is canceled
         /// </summary>
         /// <returns></returns>
-        public async Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId, string transactionId)
+        public async Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId)
         {
             var request = new HttpRequestMessage
             {
@@ -242,7 +242,7 @@
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
             request.Headers.Add("X-Vtex-Use-Https", "true");
             request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
-            request.Headers.Add("Idempotency-Key", transactionId);
+            request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
@@ -250,9 +250,9 @@
             return ParseAffirmResponse(response, responseContent);
         }
 
-        public async Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId, string transactionId, int voidAmount)
+        public async Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId, int voidAmount)
         {
-            Console.WriteLine("VoidAsync : Amount : Passed : " + voidAmount);
+            Console.WriteLine("VoidAsync : Amount : Passed : " + voidAmount + " , chargeId : " + chargeId);
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
@@ -269,7 +269,7 @@
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
             request.Headers.Add("X-Vtex-Use-Https", "true");
             request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
-            request.Headers.Add("Idempotency-Key", transactionId);
+            request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();

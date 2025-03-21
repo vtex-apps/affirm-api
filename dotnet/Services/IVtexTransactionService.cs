@@ -27,5 +27,6 @@
         Task<int> GetPartialCancelledAmount(string transactionId);
         Task<bool> isPartialCancellationEnabled();
         Task AddTransactionVoidData(string transactionId, string voidResponse);
+        Task<bool> isPartialVoidDoneForTransaction(string transactionId);
     }
 }

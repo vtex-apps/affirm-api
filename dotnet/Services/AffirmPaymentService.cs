@@ -205,6 +205,13 @@
                 {
                     string jsonResponse = JsonConvert.SerializeObject(response);
                     voidResponse = JsonConvert.DeserializeObject<AffirmVoidResponse>(jsonResponse);
+                
+                    if (voidResponse?.Type == "partial_void")
+                    {
+                        voidResponse.transactionId = capturePaymentRequest.transactionId;
+                        await _paymentRequestRepository.SaveVoidResponseAsync(voidResponse);
+                        Console.WriteLine("Saved:::::::::::::::" + JsonConvert.SerializeObject(voidResponse));
+                    }
                 }
             }
             return voidResponse;

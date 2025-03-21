@@ -118,5 +118,21 @@
             Console.WriteLine("------- AddTransactionVoidData : transactionId : " + transactionId + " , voidResponse : " + voidResponse);
             await vtexTransactionAPI.AddTransactionDataAsync(vtexAppKey, vtexAppToken, transactionId, voidResponse);
         }
+
+        
+        public async Task<bool> isPartialVoidDoneForTransaction(string transactionId)
+        {
+            // Need to get details from enablePartialCancellation
+            AffirmVoidResponse affirmVoidResponse  = await _paymentRequestRepository.GetVoidResponseAsync(transactionId);
+
+            Console.WriteLine(" isPartialVoidDoneForTransaction:: affirmVoidResponse : " + JsonConvert.SerializeObject(affirmVoidResponse));
+
+            // Ensure it's properly converted to a boolean
+            if (affirmVoidResponse != null)
+            {
+                return true;
+            }
+            return false; // Default value if affirmVoidResponse is null
+        }
     }
 }

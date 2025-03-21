@@ -20,5 +20,9 @@
         Task PostCallbackResponse(string callbackUrl, CreatePaymentResponse createPaymentResponse);
 
         Task<VtexSettings> GetAppSettings();
+
+        Task SaveVoidResponseAsync(AffirmVoidResponse affirmVoidResponse);
+        
+        Task<AffirmVoidResponse> GetVoidResponseAsync(string paymentIdentifier);
     }
 }

@@ -9,13 +9,14 @@
         private readonly IDictionary<string, CreatePaymentRequest> _inMemoryDataStore = new Dictionary<string, CreatePaymentRequest>();
         private readonly IDictionary<string, CreatePaymentResponse> _inMemoryDataStoreResponse = new Dictionary<string, CreatePaymentResponse>();
         private readonly IDictionary<string, MerchantSettings> _inMemorySettings = new Dictionary<string, MerchantSettings>();
-
+        private readonly IDictionary<string, AffirmVoidResponse> _inMemoryVoidDataStore = new Dictionary<string, AffirmVoidResponse>();
+        private readonly IDictionary<string, AffirmVoidResponse> _inMemoryVoidDataStoreResponse = new Dictionary<string, AffirmVoidResponse>();
         public InMemoryPaymentRequestRepository()
         {
-            
+
         }
 
-         public Task<CreatePaymentRequest> GetPaymentRequestAsync(string paymentIdentifier)
+        public Task<CreatePaymentRequest> GetPaymentRequestAsync(string paymentIdentifier)
         {
             if (!this._inMemoryDataStore.TryGetValue(paymentIdentifier, out var paymentRequest))
             {
@@ -39,7 +40,7 @@
             return Task.CompletedTask;
         }
 
-         public Task<CreatePaymentResponse> GetPaymentResponseAsync(string paymentId)
+        public Task<CreatePaymentResponse> GetPaymentResponseAsync(string paymentId)
         {
             if (!this._inMemoryDataStoreResponse.TryGetValue(paymentId, out var paymentResponse))
             {
@@ -75,6 +76,22 @@
         public Task<VtexSettings> GetAppSettings()
         {
             throw new System.NotImplementedException();
+        }
+
+        Task IPaymentRequestRepository.SaveVoidResponseAsync(AffirmVoidResponse affirmVoidResponse)
+        {
+            this._inMemoryVoidDataStoreResponse.Remove(affirmVoidResponse.transactionId);
+            this._inMemoryVoidDataStoreResponse.Add(affirmVoidResponse.transactionId, affirmVoidResponse);
+            return Task.CompletedTask;
+        }
+
+        Task<AffirmVoidResponse> IPaymentRequestRepository.GetVoidResponseAsync(string transactionId)
+        {
+            if (!this._inMemoryVoidDataStore.TryGetValue(transactionId, out var affirmVoidResponse))
+            {
+                return Task.FromResult((AffirmVoidResponse)null);
+            }
+            return Task.FromResult(affirmVoidResponse);
         }
     }
 }

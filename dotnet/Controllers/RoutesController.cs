@@ -8,7 +8,7 @@
     using System;
     using System.Threading.Tasks;
     using Vtex.Api.Context;
-
+    
     public class RoutesController : Controller
     {
         private readonly IAffirmPaymentService _affirmPaymentService;
@@ -103,6 +103,14 @@
             bool isPartialCancellationEnabled = true;
             if (isPartialCancellationEnabled)
             {
+                bool isPartialVoidDoneForTransaction = await _vtexTransactionService.isPartialVoidDoneForTransaction(capturePaymentRequest.transactionId);
+
+                Console.WriteLine("isPartialVoidDoneForTransaction:::::" + isPartialVoidDoneForTransaction);
+                if (isPartialVoidDoneForTransaction)
+                {
+                    return; // Exit early if pisPartialVoidDoneForTransaction is true
+                }
+
                 Console.WriteLine("isPartialCancellationEnabled : " + isPartialCancellationEnabled);
                 try
                 {
@@ -115,7 +123,7 @@
                     {
                         AffirmVoidResponse voidResponse = await _affirmPaymentService.VoidPayment(capturePaymentRequest, publicKey, privateKey, cancelledAmount);
                         _context.Vtex.Logger.Info("VoidPayment", null, $"Successfully voided {cancelledAmount}.");
-                        if (voidResponse != null) 
+                        if (voidResponse != null)
                         {
                             string voidResponseString = JsonConvert.SerializeObject(voidResponse);
                             await _vtexTransactionService.AddTransactionVoidData(capturePaymentRequest.transactionId, voidResponseString);

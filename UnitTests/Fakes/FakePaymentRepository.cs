@@ -46,5 +46,15 @@
         {
             throw new System.NotImplementedException();
         }
+
+        Task IPaymentRequestRepository.SaveVoidResponseAsync(AffirmVoidResponse affirmVoidResponse)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        Task<AffirmVoidResponse> IPaymentRequestRepository.GetVoidResponseAsync(string paymentIdentifier)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -33,6 +33,9 @@
 
         [JsonProperty("code")]
         public string? Code { get; set; }
+
+        [JsonProperty("transactionId")]
+        public string? transactionId { get; set; }
     }
 
 }

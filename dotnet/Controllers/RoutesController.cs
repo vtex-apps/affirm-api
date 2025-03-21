@@ -87,12 +87,11 @@
             }
             else
             {
-                CapturePaymentResponse captureResponse = await this._affirmPaymentService.CapturePayment(capturePaymentRequest, publicKey, privateKey);
-                _context.Vtex.Logger.Info("CapturePayment", null, $"{bodyAsText} {JsonConvert.SerializeObject(captureResponse)}");
-
                 //Check if partial cancellation feature is enabled and void the amount if items are cancelled
                 await DoPartialCancellation(capturePaymentRequest, publicKey, privateKey);
 
+                CapturePaymentResponse captureResponse = await this._affirmPaymentService.CapturePayment(capturePaymentRequest, publicKey, privateKey);
+                _context.Vtex.Logger.Info("CapturePayment", null, $"{bodyAsText} {JsonConvert.SerializeObject(captureResponse)}");
                 return Json(captureResponse);
             }
         }

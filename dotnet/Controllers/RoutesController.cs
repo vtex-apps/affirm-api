@@ -101,9 +101,10 @@
         {
             // Check if partial cancellation feature is enabled
             bool isPartialCancellationEnabled = await _vtexTransactionService.isPartialCancellationEnabled();
-            
+            isPartialCancellationEnabled = true;
             if (isPartialCancellationEnabled)
             {
+                Console.WriteLine("isPartialCancellationEnabled : " + isPartialCancellationEnabled);
                 try
                 {
                     // Get total cancelled amount from the transactionId

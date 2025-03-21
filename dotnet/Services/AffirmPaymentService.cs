@@ -180,6 +180,36 @@
             return cancelPaymentResponse;
         }
 
+        public async Task<AffirmVoidResponse> VoidPayment(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey, int voidAmount)
+        {
+            AffirmVoidResponse voidResponse = null;
+
+            // Load request from storage for order id
+            CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(capturePaymentRequest.paymentId);
+            if (paymentRequest == null)
+            {
+                _context.Vtex.Logger.Warn("CancelPayment", null, $"Could not load Payment Request for Payment Id: {capturePaymentRequest.paymentId}");
+            }
+            else
+            {
+                // Get Affirm id from storage
+                capturePaymentRequest.authorizationId = paymentRequest.transactionId;
+            }
+
+            if (!string.IsNullOrEmpty(capturePaymentRequest.authorizationId))
+            {
+                bool isLive = !capturePaymentRequest.sandboxMode; // await this.GetIsLiveSetting();
+                IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
+                dynamic response = await affirmAPI.VoidAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, capturePaymentRequest.transactionId, voidAmount);
+                if (response != null) 
+                {
+                    string jsonResponse = JsonConvert.SerializeObject(response);
+                    voidResponse = JsonConvert.DeserializeObject<AffirmVoidResponse>(jsonResponse);
+                }
+            }
+            return voidResponse;
+        }
+
         /// <summary>
         /// Captures (settle) a payment that was previously approved.
         /// </summary>

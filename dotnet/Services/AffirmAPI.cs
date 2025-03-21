@@ -250,6 +250,33 @@
             return ParseAffirmResponse(response, responseContent);
         }
 
+        public async Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId, string transactionId, int voidAmount)
+        {
+            Console.WriteLine("VoidAsync : Amount : Passed : " + voidAmount);
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri($"{affirmBaseUrl}/{AffirmConstants.Transactions}/{chargeId}/{AffirmConstants.Void}"),
+                Content = new StringContent(
+                    JsonConvert.SerializeObject(new {
+                        amount = voidAmount
+                    }),
+                    Encoding.UTF8,
+                    "application/json"
+                )
+            };
+
+            request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
+            request.Headers.Add("X-Vtex-Use-Https", "true");
+            request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
+            request.Headers.Add("Idempotency-Key", transactionId);
+
+            var response = await _httpClient.SendAsync(request);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            return ParseAffirmResponse(response, responseContent);
+        }
+
         public async Task<KatapultFunding> KatapultFundingAsync(string privateApiKey)
         {
             KatapultFunding katapultFunding = null;

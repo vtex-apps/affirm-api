@@ -23,6 +23,7 @@ namespace Vtex
             services.AddSingleton<IVtexEnvironmentVariableProvider, VtexEnvironmentVariableProvider>();
             services.AddTransient<IPaymentRequestRepository, PaymentRequestRepository>();
             services.AddTransient<IAffirmPaymentService, AffirmPaymentService>();
+            services.AddTransient<IVtexTransactionService, VtexTransactionService>();
         }
 
         public void ExtendConfigureBeforeRouting(IApplicationBuilder app, IWebHostEnvironment env)

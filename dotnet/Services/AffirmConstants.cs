@@ -43,6 +43,8 @@ namespace Affirm.Services
         public const string AlreadyCaptured = "already_captured";
 
         public const int MinimumDelayToCancel = 3600;
+        public const string HEADER_ACCEPT = "Accept";
+        public const string HEADER_CONTENT_TYPE = "Content-Type";
 
         public class Inbound
         {
@@ -55,6 +57,12 @@ namespace Affirm.Services
             public const string Approved = "approved";
             public const string Denied = "denied";
             public const string Undefined = "undefined";
+            public const string VtexPaymentBaseUrl = "vtexpayments.com.br/api/pvt";
+            public const string Cancellations = "cancellations";
+            public const string AdditionalData = "additional-data";
+            public const string HEADER_VTEX_ACCOUNT = "X-Vtex-Account";
+            public const string HEADER_VTEX_API_APP_KEY = "X-VTEX-API-AppKey";
+            public const string HEADER_VTEX_API_APP_TOKEN = "X-VTEX-API-AppToken";
         }
     }
 }

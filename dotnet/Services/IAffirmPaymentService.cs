@@ -11,6 +11,8 @@
 
         Task<CapturePaymentResponse> CapturePayment(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey);
 
+        Task<AffirmVoidResponse> VoidPayment(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey, int voidAmount);
+
         Task<RefundPaymentResponse> RefundPayment(RefundPaymentRequest refundPaymentRequest, string publicKey, string privateKey);
 
         Task<CreatePaymentRequest> GetCreatePaymentRequest(string paymentIdentifier);

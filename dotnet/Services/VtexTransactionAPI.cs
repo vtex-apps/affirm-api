@@ -62,14 +62,12 @@
             }
             catch (HttpRequestException ex)
             {
-                _context.Vtex.Logger.Error("GetPaymentCancellationsAsync", null, $"Network error: {ex.Message}");
-                Console.WriteLine("GetPaymentCancellationsAsync HttpRequestException : " + ex.StackTrace);
+                _context.Vtex.Logger.Error("GetPaymentCancellationsAsync", null, $"HttpRequestException error: {ex.Message}");
                 return new JObject { ["error"] = "Network error while calling VTEX API." };
             }
             catch (Exception ex)
             {
                 _context.Vtex.Logger.Error("GetPaymentCancellationsAsync", null, $"Unexpected error: {ex.Message}");
-                Console.WriteLine("GetPaymentCancellationsAsync Exception : " + ex.StackTrace);
                 return new JObject { ["error"] = "An unexpected error occurred." };
             }
         }

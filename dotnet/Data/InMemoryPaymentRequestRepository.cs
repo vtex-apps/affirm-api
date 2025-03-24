@@ -13,10 +13,10 @@
         private readonly IDictionary<string, AffirmVoidResponse> _inMemoryVoidDataStoreResponse = new Dictionary<string, AffirmVoidResponse>();
         public InMemoryPaymentRequestRepository()
         {
-
+            
         }
 
-        public Task<CreatePaymentRequest> GetPaymentRequestAsync(string paymentIdentifier)
+         public Task<CreatePaymentRequest> GetPaymentRequestAsync(string paymentIdentifier)
         {
             if (!this._inMemoryDataStore.TryGetValue(paymentIdentifier, out var paymentRequest))
             {
@@ -40,7 +40,7 @@
             return Task.CompletedTask;
         }
 
-        public Task<CreatePaymentResponse> GetPaymentResponseAsync(string paymentId)
+         public Task<CreatePaymentResponse> GetPaymentResponseAsync(string paymentId)
         {
             if (!this._inMemoryDataStoreResponse.TryGetValue(paymentId, out var paymentResponse))
             {

@@ -23,7 +23,7 @@
         private const string HEADER_VTEX_WORKSPACE = "X-Vtex-Workspace";
         private const string HEADER_VTEX_ACCOUNT = "X-Vtex-Account";
         private const string APPLICATION_JSON = "application/json";
-        private const string APP_SETTINGS = "logixalpartnerus.affirm-payment";
+        private const string APP_SETTINGS = "vtex.affirm-payment";
         private readonly IVtexEnvironmentVariableProvider _environmentVariableProvider;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly HttpClient _httpClient;

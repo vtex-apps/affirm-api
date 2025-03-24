@@ -252,7 +252,11 @@
 
         public async Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId, int voidAmount)
         {
-            Console.WriteLine("VoidAsync : Amount : Passed : " + voidAmount + " , chargeId : " + chargeId);
+            _context.Vtex.Logger.Info(
+                "VoidAsync",
+                null,
+                $"VoidAsync: Amount Passed: {voidAmount}, Charge ID: {chargeId}"
+            );
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
@@ -262,7 +266,7 @@
                         amount = voidAmount
                     }),
                     Encoding.UTF8,
-                    "application/json"
+                    APPLICATION_JSON
                 )
             };
 

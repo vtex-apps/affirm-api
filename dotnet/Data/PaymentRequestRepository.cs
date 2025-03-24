@@ -136,7 +136,12 @@
             response.EnsureSuccessStatusCode();
         }
 
-   public async Task SaveVoidResponseAsync(AffirmVoidResponse affirmVoidResponse)
+        /// <summary>
+        /// Saves the void response for a transaction asynchronously in VTEX VBase.
+        /// </summary>
+        /// <param name="affirmVoidResponse">The AffirmVoidResponse object containing transaction details.</param>
+        /// <returns>Returns a Task that represents the asynchronous operation.</returns>
+        public async Task SaveVoidResponseAsync(AffirmVoidResponse affirmVoidResponse)
         {
             
             var jsonSerializedAffirmVoidResponse = JsonConvert.SerializeObject(affirmVoidResponse);
@@ -154,13 +159,17 @@
             }
 
             var response = await _httpClient.SendAsync(request);
-
-            Console.WriteLine("Saved Response ::::::::::::::::::::::" + JsonConvert.SerializeObject(response));
-
-
             response.EnsureSuccessStatusCode();
         }
 
+        /// <summary>
+        /// Retrieves the void response for a given payment ID from the VTEX VBase storage.
+        /// </summary>
+        /// <param name="paymentId">The unique identifier of the payment transaction.</param>
+        /// <returns>
+        /// An <see cref="AffirmVoidResponse"/> object containing the void response details if found;
+        /// otherwise, returns <c>null</c> if the response is not found.
+        /// </returns>
         public async Task<AffirmVoidResponse> GetVoidResponseAsync(string paymentId)
         {
             var request = new HttpRequestMessage

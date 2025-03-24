@@ -32,11 +32,10 @@
         /// VTEX Payment API to get the Cancellation activities on the transaction that was previously approved, but not settled. 
         /// It is possible to cancel partially or complete value of the transaction.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Task representing the asynchronous operation for getting cancellation done on transaction</returns>
         public async Task<JObject> GetPaymentCancellationsAsync(string vtexAppKey, string vtexAppToken, string transactionId)
         {
             string vtexGetCancellationBaseUrl = $"https://{this.vtexAccount}.{AffirmConstants.Vtex.VtexPaymentBaseUrl}/{AffirmConstants.Transactions}/{transactionId}/{AffirmConstants.Vtex.Cancellations}";
-            Console.WriteLine("GetPaymentCancellationsAsync : vtexGetCancellationBaseUrl : " + vtexGetCancellationBaseUrl);
             _context.Vtex.Logger.Info("GetPaymentCancellationsAsync : vtexGetCancellationBaseUrl : " + vtexGetCancellationBaseUrl);
 
             try
@@ -75,21 +74,24 @@
             }
         }
 
+        /// <summary>
+        /// Adds void response data to a VTEX transaction's additional data.
+        /// </summary>
+        /// <param name="vtexAppKey">The VTEX application key for authentication.</param>
+        /// <param name="vtexAppToken">The VTEX application token for authentication.</param>
+        /// <param name="transactionId">The transaction ID to which the void response data is added.</param>
+        /// <param name="transactionData">The serialized void response data to be stored.</param>
+        /// <returns>A Task representing the asynchronous operation for adding data to transaction</returns>
         public async Task AddTransactionDataAsync(string vtexAppKey, string vtexAppToken, string transactionId, string transactionData)
         {
-            Console.WriteLine("######### AddTransactionDataAsync : transactionId : " + transactionId + " , voidResponse : " + transactionData);
+            _context.Vtex.Logger.Info("AddTransactionDataAsync", null, $"Adding Void Response data for TransactionId: {transactionId} : VoidResponse: {transactionData}");
             string vtexAdditionalDataBaseUrl = $"https://{this.vtexAccount}.{AffirmConstants.Vtex.VtexPaymentBaseUrl}/{AffirmConstants.Transactions}/{transactionId}/{AffirmConstants.Vtex.AdditionalData}";
-            Console.WriteLine("AddTransactionDataAsync : vtexAdditionalDataBaseUrl : " + vtexAdditionalDataBaseUrl);
-            _context.Vtex.Logger.Info("AddTransactionDataAsync : vtexAdditionalDataBaseUrl : " + vtexAdditionalDataBaseUrl);
-
-            //string escapedJsonString = JsonConvert.SerializeObject(transactionData);
-            //Console.WriteLine("#%%%%%%% : escapedJsonString : " + escapedJsonString);
 
             var requestBody = new List<object>
             {
                 new
                 {
-                    name = "voidResponse",
+                    name = AffirmConstants.Vtex.VoidResponse,
                     value = transactionData
                 }
             };
@@ -100,37 +102,38 @@
             {
                 var request = new HttpRequestMessage
                 {
-                    Method = HttpMethod.Post, // Changed from GET to POST (GET should not have a body)
+                    Method = HttpMethod.Post,
                     RequestUri = new Uri(vtexAdditionalDataBaseUrl),
                     Content = new StringContent(
                     requestBodySerial,
                     Encoding.UTF8,
-                    "application/json"
+                    APPLICATION_JSON
                     )
                 };
 
                 request.Headers.Add(AffirmConstants.Vtex.HEADER_VTEX_API_APP_KEY, vtexAppKey);
                 request.Headers.Add(AffirmConstants.Vtex.HEADER_VTEX_API_APP_TOKEN, vtexAppToken);
 
+                //Making the additional-data call to save response on Transaction
                 HttpResponseMessage response = await _httpClient.SendAsync(request);
 
                 string responseContent = await response.Content.ReadAsStringAsync();
                 if (!response.IsSuccessStatusCode)
                 {
-                    _context.Vtex.Logger.Error("AddTransactionDataAsync", null, $"VTEX API Error: {response.StatusCode}, Response: {responseContent}");
+                    _context.Vtex.Logger.Error(
+                        "AddTransactionDataAsync",
+                        null,
+                        $"VTEX API Error | StatusCode: {response.StatusCode} | Response: {responseContent} | TransactionId: {transactionId}"
+                    );
                 }
-                _context.Vtex.Logger.Info("AddTransactionDataAsync", responseContent);
-                Console.WriteLine("AddTransactionDataAsync 11111 : ", responseContent);
             }
             catch (HttpRequestException ex)
             {
-                _context.Vtex.Logger.Error("AddTransactionDataAsync", null, $"Network error: {ex.Message}");
-                Console.WriteLine("AddTransactionDataAsync HttpRequestException : ", ex.StackTrace);
+                _context.Vtex.Logger.Error("AddTransactionDataAsync", null, $"VTEX API HttpRequestException Error: {ex.Message}, for transactionId : {transactionId}");
             }
             catch (Exception ex)
             {
-                _context.Vtex.Logger.Error("AddTransactionDataAsync", null, $"Unexpected error: {ex.Message}");
-                Console.WriteLine("AddTransactionDataAsync Exception : " + ex.StackTrace);
+                _context.Vtex.Logger.Error("AddTransactionDataAsync", null, $"VTEX API Exception Error: {ex.Message}, for transactionId : {transactionId}");
             }
         }
 	}

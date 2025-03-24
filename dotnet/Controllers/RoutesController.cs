@@ -8,7 +8,7 @@
     using System;
     using System.Threading.Tasks;
     using Vtex.Api.Context;
-    
+
     public class RoutesController : Controller
     {
         private readonly IAffirmPaymentService _affirmPaymentService;
@@ -96,33 +96,49 @@
             }
         }
 
+        /// <summary>
+        /// Handles partial cancellation of a payment transaction if the feature is enabled.
+        /// </summary>
+        /// <param name="capturePaymentRequest">The payment capture request containing transaction details.</param>
+        /// <param name="publicKey">The public key used for authentication with the Affirm payment service.</param>
+        /// <param name="privateKey">The private key used for authentication with the Affirm payment service.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         private async Task DoPartialCancellation(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey)
         {
             // Check if partial cancellation feature is enabled
-            //bool isPartialCancellationEnabled = await _vtexTransactionService.isPartialCancellationEnabled();
-            bool isPartialCancellationEnabled = true;
+            bool isPartialCancellationEnabled = await _vtexTransactionService.isPartialCancellationEnabled();
             if (isPartialCancellationEnabled)
             {
-                bool isPartialVoidDoneForTransaction = await _vtexTransactionService.isPartialVoidDoneForTransaction(capturePaymentRequest.transactionId);
-
-                Console.WriteLine("isPartialVoidDoneForTransaction:::::" + isPartialVoidDoneForTransaction);
-                if (isPartialVoidDoneForTransaction)
-                {
-                    return; // Exit early if pisPartialVoidDoneForTransaction is true
-                }
-
-                Console.WriteLine("isPartialCancellationEnabled : " + isPartialCancellationEnabled);
                 try
                 {
+                    bool isPartialVoidDoneForTransaction = await _vtexTransactionService.isPartialVoidDoneForTransaction(capturePaymentRequest.transactionId);
+                    if (isPartialVoidDoneForTransaction)
+                    {
+                        _context.Vtex.Logger.Info(
+                            "DoPartialCancellation",
+                            null,
+                            $"isPartialVoidDoneForTransaction: {isPartialVoidDoneForTransaction} on Transaction ID: {capturePaymentRequest.transactionId}"
+                        );
+                        return; // Exit early if isPartialVoidDoneForTransaction is true
+                    }
+
                     // Get total cancelled amount from the transactionId
                     int cancelledAmount = await _vtexTransactionService.GetPartialCancelledAmount(capturePaymentRequest.transactionId);
-                    _context.Vtex.Logger.Info("Cancelled Amount: " + cancelledAmount + " on transaction id : " + capturePaymentRequest.transactionId);
+                    _context.Vtex.Logger.Info(
+                        "DoPartialCancellation",
+                        null,
+                        $"Cancelled Amount: {cancelledAmount} on Transaction ID: {capturePaymentRequest.transactionId}"
+                    );
 
                     // If the cancelledAmount > 0, then void the cancelledAmount
                     if (cancelledAmount > 0)
                     {
                         AffirmVoidResponse voidResponse = await _affirmPaymentService.VoidPayment(capturePaymentRequest, publicKey, privateKey, cancelledAmount);
-                        _context.Vtex.Logger.Info("VoidPayment", null, $"Successfully voided {cancelledAmount}.");
+                        _context.Vtex.Logger.Info(
+                            "DoPartialCancellation",
+                            null,
+                            $"Successfully voided {cancelledAmount} for transactionId {capturePaymentRequest.transactionId}."
+                        );
                         if (voidResponse != null)
                         {
                             string voidResponseString = JsonConvert.SerializeObject(voidResponse);

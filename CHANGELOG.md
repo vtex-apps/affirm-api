@@ -7,13 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [1.3.21] - 2025-03-24
+### Changed
 
-### Fixed
-
- - Added Feature to Void the amount for partially cancelled items on order when capturing the final amount on Invoice
- - Managaned by feature flag enablePartialCancellation configure in Vtex Settings of Affirm Payment App
- - Added idempotency key for Refund and Void
+- Added Feature to Void the amount for partially cancelled items on order when capturing the final amount on Invoice
+- Managaned by feature flag enablePartialCancellation configure in Vtex Settings of Affirm Payment App
+- Added idempotency key for Refund and Void
 
 ## [1.3.6] - 2024-03-12
 

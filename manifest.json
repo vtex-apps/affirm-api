@@ -1,7 +1,7 @@
 {
   "name": "affirm-api",
   "vendor": "logixalpartnerus",
-  "version": "1.3.20",
+  "version": "1.3.21",
   "title": "Affirm",
   "description": "An implementation of Affirm By Logixal",
   "categories": [],

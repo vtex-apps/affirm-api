@@ -33,9 +33,9 @@
         /// It is possible to cancel partially or complete value of the transaction.
         /// </summary>
         /// <returns>Task representing the asynchronous operation for getting cancellation done on transaction</returns>
-        public async Task<JObject> GetPaymentCancellationsAsync(string vtexAppKey, string vtexAppToken, string transactionId)
+        public async Task<JObject> GetPaymentCancellationsAsync(string transactionId)
         {
-            string vtexGetCancellationBaseUrl = $"https://{this.vtexAccount}.{AffirmConstants.Vtex.VtexPaymentBaseUrl}/{AffirmConstants.Transactions}/{transactionId}/{AffirmConstants.Vtex.Cancellations}";
+            string vtexGetCancellationBaseUrl = $"http://{this.vtexAccount}.{AffirmConstants.Vtex.VtexPaymentBaseUrl}/{AffirmConstants.Transactions}/{transactionId}/{AffirmConstants.Vtex.Cancellations}";
             _context.Vtex.Logger.Info("GetPaymentCancellationsAsync : vtexGetCancellationBaseUrl : " + vtexGetCancellationBaseUrl);
 
             try
@@ -46,8 +46,9 @@
                     RequestUri = new Uri(vtexGetCancellationBaseUrl)
                 };
 
-                request.Headers.Add(AffirmConstants.Vtex.HEADER_VTEX_API_APP_KEY, vtexAppKey);
-                request.Headers.Add(AffirmConstants.Vtex.HEADER_VTEX_API_APP_TOKEN, vtexAppToken);
+                request.Headers.Add(AffirmConstants.Vtex.VtexIdclientAutCookie, _context.Vtex.AuthToken);
+                request.Headers.Add(AffirmConstants.Vtex.VtexUseHttps, "true");
+                request.Headers.Add(AffirmConstants.Vtex.ProxyAuthorization, _context.Vtex.AuthToken);
 
                 HttpResponseMessage response = await _httpClient.SendAsync(request);
 
@@ -75,15 +76,13 @@
         /// <summary>
         /// Adds void response data to a VTEX transaction's additional data.
         /// </summary>
-        /// <param name="vtexAppKey">The VTEX application key for authentication.</param>
-        /// <param name="vtexAppToken">The VTEX application token for authentication.</param>
         /// <param name="transactionId">The transaction ID to which the void response data is added.</param>
         /// <param name="transactionData">The serialized void response data to be stored.</param>
         /// <returns>A Task representing the asynchronous operation for adding data to transaction</returns>
-        public async Task AddTransactionDataAsync(string vtexAppKey, string vtexAppToken, string transactionId, string transactionData)
+        public async Task AddTransactionDataAsync(string transactionId, string transactionData)
         {
             _context.Vtex.Logger.Info("AddTransactionDataAsync", null, $"Adding Void Response data for TransactionId: {transactionId} : VoidResponse: {transactionData}");
-            string vtexAdditionalDataBaseUrl = $"https://{this.vtexAccount}.{AffirmConstants.Vtex.VtexPaymentBaseUrl}/{AffirmConstants.Transactions}/{transactionId}/{AffirmConstants.Vtex.AdditionalData}";
+            string vtexAdditionalDataBaseUrl = $"http://{this.vtexAccount}.{AffirmConstants.Vtex.VtexPaymentBaseUrl}/{AffirmConstants.Transactions}/{transactionId}/{AffirmConstants.Vtex.AdditionalData}";
 
             var requestBody = new List<object>
             {
@@ -109,8 +108,9 @@
                     )
                 };
 
-                request.Headers.Add(AffirmConstants.Vtex.HEADER_VTEX_API_APP_KEY, vtexAppKey);
-                request.Headers.Add(AffirmConstants.Vtex.HEADER_VTEX_API_APP_TOKEN, vtexAppToken);
+                request.Headers.Add(AffirmConstants.Vtex.VtexIdclientAutCookie, _context.Vtex.AuthToken);
+                request.Headers.Add(AffirmConstants.Vtex.VtexUseHttps, "true");
+                request.Headers.Add(AffirmConstants.Vtex.ProxyAuthorization, _context.Vtex.AuthToken);
 
                 //Making the additional-data call to save response on Transaction
                 HttpResponseMessage response = await _httpClient.SendAsync(request);

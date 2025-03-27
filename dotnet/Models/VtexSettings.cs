@@ -18,7 +18,5 @@
         public string katapultPublicToken { get; set; }
         public string katapultPrivateToken { get; set; }
         public bool enablePartialCancellation { get; set; }
-        public string vtexAppKey { get; set; }
-        public string vtexAppToken { get; set; }
     }
 }

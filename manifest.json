@@ -83,6 +83,12 @@
     },
     {
       "name": "vbase-read-write"
+    },
+    {
+      "name": "ViewPayments"
+    },
+    {
+      "name": "MakePayments"
     }
   ],
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"

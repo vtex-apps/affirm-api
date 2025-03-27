@@ -38,11 +38,11 @@
         /// </summary>
         /// <param name="cancelPaymentRequest"></param>
         /// <returns></returns>
-        public async Task<GetPaymentCancellationResponse> GetPaymentCancellations(string vtexAppKey, string vtexAppToken, string transactionId)
+        public async Task<GetPaymentCancellationResponse> GetPaymentCancellations(string transactionId)
         {
             IVtexTransactionAPI vtexTransactionAPI = new VtexTransactionAPI(_httpContextAccessor, _httpClient, _context);
             dynamic getPaymentCancellationsResponse =
-                await vtexTransactionAPI.GetPaymentCancellationsAsync(vtexAppKey, vtexAppToken, transactionId);
+                await vtexTransactionAPI.GetPaymentCancellationsAsync(transactionId);
             GetPaymentCancellationResponse paymentCancellationResponse = null;
             if (getPaymentCancellationsResponse != null)
             {
@@ -64,21 +64,8 @@
         /// </returns>
         public async Task<int> GetPartialCancelledAmount(string transactionId)
         {
-            // Need to get details from VTEX App key and Token
-            VtexSettings vtexSettings = await _paymentRequestRepository.GetAppSettings();
-
-            string vtexAppKey = vtexSettings.vtexAppKey;
-            string vtexAppToken = vtexSettings.vtexAppToken;
-
-            // Validate credentials
-            if (string.IsNullOrWhiteSpace(vtexAppKey) || string.IsNullOrWhiteSpace(vtexAppToken))
-            {
-                _context.Vtex.Logger.Warn("GetPartialCancelledAmount", null, "VTEX App Key or Token is missing.");
-                return 0;
-            }
-
             //Gets the Cancellations actions done on payment
-            var getPaymentCancellationsResponse = await GetPaymentCancellations(vtexAppKey, vtexAppToken, transactionId);
+            var getPaymentCancellationsResponse = await GetPaymentCancellations(transactionId);
 
             if (getPaymentCancellationsResponse == null || getPaymentCancellationsResponse?.actions == null)
             {
@@ -127,33 +114,30 @@
         }
 
         /// <summary>
-        /// Adds void transaction data to VTEX if valid credentials are available.
+        /// Asynchronously adds void transaction data to the VTEX transaction API in a fire-and-forget manner.
         /// </summary>
-        /// <param name="transactionId">The transaction ID for which the void data is being added.</param>
-        /// <param name="voidResponse">The void response data in JSON format.</param>
-        /// <returns>A task representing the asynchronous operation for Adding Transaction data</returns>
-        public async Task AddTransactionVoidData(string transactionId, string voidResponse)
+        /// <param name="transactionId">The unique identifier of the transaction.</param>
+        /// <param name="voidResponse">The serialized response data related to the void transaction.</param>
+        /// <remarks>
+        /// This method executes the API call in the background using `Task.Run`, ensuring that it does not block the main thread.
+        /// Any exceptions encountered are logged to prevent unhandled errors.
+        /// </remarks>
+        public void AddTransactionVoidData(string transactionId, string voidResponse)
         {
-            // Retrieve VTEX settings
-            VtexSettings vtexSettings = await _paymentRequestRepository.GetAppSettings();
-
-            // Extract VTEX Key and Token credentials
-            string vtexAppKey = vtexSettings.vtexAppKey;
-            string vtexAppToken = vtexSettings.vtexAppToken;
-
-            // Validate credentials
-            if (string.IsNullOrWhiteSpace(vtexAppKey) || string.IsNullOrWhiteSpace(vtexAppToken))
+            Task.Run(async () =>
             {
-                _context.Vtex.Logger.Warn("AddTransactionVoidData", null, "VTEX App Key or Token is missing, aborting transaction update.");
-                return;
-            }
-
-            // Initialize VTEX Transaction API
-            IVtexTransactionAPI vtexTransactionAPI = new VtexTransactionAPI(_httpContextAccessor, _httpClient, _context);
-
-            // Add transaction data
-            await vtexTransactionAPI.AddTransactionDataAsync(vtexAppKey, vtexAppToken, transactionId, voidResponse);
+                try
+                {
+                    IVtexTransactionAPI vtexTransactionAPI = new VtexTransactionAPI(_httpContextAccessor, _httpClient, _context);
+                    await vtexTransactionAPI.AddTransactionDataAsync(transactionId, voidResponse);
+                }
+                catch (Exception ex)
+                {
+                    _context.Vtex.Logger.Error("AddTransactionVoidData", null, $"Error adding transaction void data: {ex.Message}, TransactionId: {transactionId}");
+                }
+            });
         }
+
 
         /// <summary>
         /// Checks whether a partial void has been processed for a given transaction.

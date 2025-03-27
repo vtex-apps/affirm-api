@@ -64,6 +64,9 @@ namespace Affirm.Services
             public const string HEADER_VTEX_API_APP_KEY = "X-VTEX-API-AppKey";
             public const string HEADER_VTEX_API_APP_TOKEN = "X-VTEX-API-AppToken";
             public const string VoidResponse = "voidResponse";
+            public const string ProxyAuthorization = "Proxy-Authorization";
+            public const string VtexUseHttps = "X-Vtex-Use-Https";
+            public const string VtexIdclientAutCookie = "VtexIdclientAutCookie";
         }
     }
 }

@@ -14,7 +14,7 @@
         /// the list of cancellation requests and actions performed during the cancellation process.
         /// If the request fails, it may return an error response.
         /// </returns>
-        Task<GetPaymentCancellationResponse> GetPaymentCancellations(string vtexAppKey, string vtexAppToken, string transactionId);
+        Task<GetPaymentCancellationResponse> GetPaymentCancellations(string transactionId);
 
         /// <summary>
         /// Retrieves the total amount of partially cancelled items payments for a given transaction.
@@ -39,12 +39,15 @@
         Task<bool> isPartialCancellationEnabled();
 
         /// <summary>
-        /// Adds void transaction data to VTEX if valid credentials are available.
+        /// Asynchronously adds void transaction data to the VTEX transaction API in a fire-and-forget manner.
         /// </summary>
-        /// <param name="transactionId">The transaction ID for which the void data is being added.</param>
-        /// <param name="voidResponse">The void response data in JSON format.</param>
-        /// <returns>A task representing the asynchronous operation for Adding Transaction data</returns>
-        Task AddTransactionVoidData(string transactionId, string voidResponse);
+        /// <param name="transactionId">The unique identifier of the transaction.</param>
+        /// <param name="voidResponse">The serialized response data related to the void transaction.</param>
+        /// <remarks>
+        /// This method executes the API call in the background using `Task.Run`, ensuring that it does not block the main thread.
+        /// Any exceptions encountered are logged to prevent unhandled errors.
+        /// </remarks>
+        void AddTransactionVoidData(string transactionId, string voidResponse);
 
         /// <summary>
         /// Checks whether a partial void has been processed for a given transaction.

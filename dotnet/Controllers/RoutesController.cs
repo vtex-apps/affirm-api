@@ -142,7 +142,8 @@
                         if (voidResponse != null)
                         {
                             string voidResponseString = JsonConvert.SerializeObject(voidResponse);
-                            await _vtexTransactionService.AddTransactionVoidData(capturePaymentRequest.transactionId, voidResponseString);
+                            //Asynchronously adds void transaction data to the VTEX transaction API in a fire-and-forget manner.
+                            _vtexTransactionService.AddTransactionVoidData(capturePaymentRequest.transactionId, voidResponseString);
                         }
                     }
                 }

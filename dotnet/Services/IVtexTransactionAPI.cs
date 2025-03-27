@@ -15,16 +15,14 @@
         /// or complete value of the transaction.
         /// </summary>
         /// <returns>Task representing the asynchronous operation for getting cancellation done on transaction</returns>
-        Task<JObject> GetPaymentCancellationsAsync(string vtexAppKey, string vtexAppToken, string transactionId);
+        Task<JObject> GetPaymentCancellationsAsync(string transactionId);
 
         /// <summary>
         /// Adds void response data to a VTEX transaction's additional data.
         /// </summary>
-        /// <param name="vtexAppKey">The VTEX application key for authentication.</param>
-        /// <param name="vtexAppToken">The VTEX application token for authentication.</param>
         /// <param name="transactionId">The transaction ID to which the void response data is added.</param>
         /// <param name="transactionData">The serialized void response data to be stored.</param>
         /// <returns>A Task representing the asynchronous operation for adding data to transaction</returns>
-        Task AddTransactionDataAsync(string vtexAppKey, string vtexAppToken, string transactionId, string transactionData);
+        Task AddTransactionDataAsync(string transactionId, string transactionData);
     }
 }

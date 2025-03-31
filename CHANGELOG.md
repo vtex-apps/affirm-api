@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.4.0] - 2025-03-31
+
 ### Changed
 
 - Added Feature to Void the amount for partially cancelled items on order when capturing the final amount on Invoice

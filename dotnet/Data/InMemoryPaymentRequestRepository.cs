@@ -9,7 +9,8 @@
         private readonly IDictionary<string, CreatePaymentRequest> _inMemoryDataStore = new Dictionary<string, CreatePaymentRequest>();
         private readonly IDictionary<string, CreatePaymentResponse> _inMemoryDataStoreResponse = new Dictionary<string, CreatePaymentResponse>();
         private readonly IDictionary<string, MerchantSettings> _inMemorySettings = new Dictionary<string, MerchantSettings>();
-
+        private readonly IDictionary<string, AffirmVoidResponse> _inMemoryVoidDataStore = new Dictionary<string, AffirmVoidResponse>();
+        private readonly IDictionary<string, AffirmVoidResponse> _inMemoryVoidDataStoreResponse = new Dictionary<string, AffirmVoidResponse>();
         public InMemoryPaymentRequestRepository()
         {
             
@@ -75,6 +76,22 @@
         public Task<VtexSettings> GetAppSettings()
         {
             throw new System.NotImplementedException();
+        }
+
+        Task IPaymentRequestRepository.SaveVoidResponseAsync(AffirmVoidResponse affirmVoidResponse)
+        {
+            this._inMemoryVoidDataStoreResponse.Remove(affirmVoidResponse.transactionId);
+            this._inMemoryVoidDataStoreResponse.Add(affirmVoidResponse.transactionId, affirmVoidResponse);
+            return Task.CompletedTask;
+        }
+
+        Task<AffirmVoidResponse> IPaymentRequestRepository.GetVoidResponseAsync(string transactionId)
+        {
+            if (!this._inMemoryVoidDataStore.TryGetValue(transactionId, out var affirmVoidResponse))
+            {
+                return Task.FromResult((AffirmVoidResponse)null);
+            }
+            return Task.FromResult(affirmVoidResponse);
         }
     }
 }

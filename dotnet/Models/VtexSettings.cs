@@ -17,5 +17,6 @@
         public bool enableKatapult { get; set; }
         public string katapultPublicToken { get; set; }
         public string katapultPrivateToken { get; set; }
+        public bool enablePartialCancellation { get; set; }
     }
 }

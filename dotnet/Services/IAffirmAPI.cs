@@ -57,6 +57,14 @@
         Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId);
 
         /// <summary>
+        /// Cancel the given authorized charge (voidAmount). After voiding a loan:
+        /// It is permanently canceled and cannot be re-authorized
+        /// The customer receives a notice that the transaction is canceled
+        /// </summary>
+        /// <returns></returns>
+        Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId, int voidAmount);
+
+        /// <summary>
         /// Refund a charge. (add link to refund info)
         /// </summary>
         /// <returns></returns>

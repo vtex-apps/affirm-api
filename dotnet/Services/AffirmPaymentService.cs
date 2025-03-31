@@ -181,6 +181,56 @@
         }
 
         /// <summary>
+        /// Attempts to void a payment for a given transaction.
+        /// Retrieves the original payment request, sends a void request to Affirm, and saves the response.
+        /// </summary>
+        /// <param name="capturePaymentRequest">The capture payment request containing transaction details.</param>
+        /// <param name="publicKey">The public key for API authentication.</param>
+        /// <param name="privateKey">The private key for API authentication.</param>
+        /// <param name="voidAmount">The amount to be voided.</param>
+        /// <returns>Returns an <see cref="AffirmVoidResponse"/> object if successful, otherwise null.</returns>
+        public async Task<AffirmVoidResponse> VoidPayment(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey, int voidAmount)
+        {
+            AffirmVoidResponse voidResponse = null;
+            // Load request from storage for order id
+            CreatePaymentRequest paymentRequest = await this._paymentRequestRepository.GetPaymentRequestAsync(capturePaymentRequest.paymentId);
+            if (paymentRequest == null)
+            {
+                _context.Vtex.Logger.Warn("VoidPayment", null, $"Could not load Payment Request for Payment Id: {capturePaymentRequest.paymentId}");
+            }
+            else
+            {
+                // Get Affirm id from storage
+                capturePaymentRequest.authorizationId = paymentRequest.transactionId;
+            }
+
+            if (!string.IsNullOrEmpty(capturePaymentRequest.authorizationId))
+            {
+                bool isLive = !capturePaymentRequest.sandboxMode;
+                IAffirmAPI affirmAPI = new AffirmAPI(_httpContextAccessor, _httpClient, isLive, _context);
+                dynamic response = await affirmAPI.VoidAsync(publicKey, privateKey, capturePaymentRequest.authorizationId, voidAmount);
+                //If VoidAsync response is not null, then save the response if it's success.
+                if (response != null) 
+                {
+                    string jsonResponse = JsonConvert.SerializeObject(response);
+                    voidResponse = JsonConvert.DeserializeObject<AffirmVoidResponse>(jsonResponse);
+                
+                    if (voidResponse?.Type == AffirmConstants.PartialVoid)
+                    {
+                        voidResponse.transactionId = capturePaymentRequest.transactionId;
+                        await _paymentRequestRepository.SaveVoidResponseAsync(voidResponse);
+                        _context.Vtex.Logger.Info(
+                            "VoidPayment",
+                            null,
+                            $"Saved void response for Transaction ID: {voidResponse.transactionId}, Response: {JsonConvert.SerializeObject(voidResponse)}"
+                        );
+                    }
+                }
+            }
+            return voidResponse;
+        }
+
+        /// <summary>
         /// Captures (settle) a payment that was previously approved.
         /// </summary>
         /// <param name="capturePaymentRequest"></param>

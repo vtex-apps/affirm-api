@@ -12,11 +12,13 @@
     public class RoutesController : Controller
     {
         private readonly IAffirmPaymentService _affirmPaymentService;
+        private readonly IVtexTransactionService _vtexTransactionService;
         private readonly IIOServiceContext _context;
 
-        public RoutesController(IAffirmPaymentService affirmPaymentService, IIOServiceContext context)
+        public RoutesController(IAffirmPaymentService affirmPaymentService, IVtexTransactionService vtexTransactionService, IIOServiceContext context)
         {
             this._affirmPaymentService = affirmPaymentService ?? throw new ArgumentNullException(nameof(affirmPaymentService));
+            this._vtexTransactionService = vtexTransactionService ?? throw new ArgumentNullException(nameof(vtexTransactionService));
             this._context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
@@ -85,10 +87,70 @@
             }
             else
             {
+                //Check if partial cancellation feature is enabled and void the amount if items are cancelled
+                await DoPartialCancellation(capturePaymentRequest, publicKey, privateKey);
+
                 CapturePaymentResponse captureResponse = await this._affirmPaymentService.CapturePayment(capturePaymentRequest, publicKey, privateKey);
                 _context.Vtex.Logger.Info("CapturePayment", null, $"{bodyAsText} {JsonConvert.SerializeObject(captureResponse)}");
-
                 return Json(captureResponse);
+            }
+        }
+
+        /// <summary>
+        /// Handles partial cancellation of a payment transaction if the feature is enabled.
+        /// </summary>
+        /// <param name="capturePaymentRequest">The payment capture request containing transaction details.</param>
+        /// <param name="publicKey">The public key used for authentication with the Affirm payment service.</param>
+        /// <param name="privateKey">The private key used for authentication with the Affirm payment service.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        private async Task DoPartialCancellation(CapturePaymentRequest capturePaymentRequest, string publicKey, string privateKey)
+        {
+            // Check if partial cancellation feature is enabled
+            bool isPartialCancellationEnabled = await _vtexTransactionService.isPartialCancellationEnabled();
+            if (isPartialCancellationEnabled)
+            {
+                try
+                {
+                    bool isPartialVoidDoneForTransaction = await _vtexTransactionService.isPartialVoidDoneForTransaction(capturePaymentRequest.transactionId);
+                    if (isPartialVoidDoneForTransaction)
+                    {
+                        _context.Vtex.Logger.Info(
+                            "DoPartialCancellation",
+                            null,
+                            $"isPartialVoidDoneForTransaction: {isPartialVoidDoneForTransaction} on Transaction ID: {capturePaymentRequest.transactionId}"
+                        );
+                        return; // Exit early if isPartialVoidDoneForTransaction is true
+                    }
+
+                    // Get total cancelled amount from the transactionId
+                    int cancelledAmount = await _vtexTransactionService.GetPartialCancelledAmount(capturePaymentRequest.transactionId);
+                    _context.Vtex.Logger.Info(
+                        "DoPartialCancellation",
+                        null,
+                        $"Cancelled Amount: {cancelledAmount} on Transaction ID: {capturePaymentRequest.transactionId}"
+                    );
+
+                    // If the cancelledAmount > 0, then void the cancelledAmount
+                    if (cancelledAmount > 0)
+                    {
+                        AffirmVoidResponse voidResponse = await _affirmPaymentService.VoidPayment(capturePaymentRequest, publicKey, privateKey, cancelledAmount);
+                        _context.Vtex.Logger.Info(
+                            "DoPartialCancellation",
+                            null,
+                            $"Successfully voided {cancelledAmount} for transactionId {capturePaymentRequest.transactionId}."
+                        );
+                        if (voidResponse != null)
+                        {
+                            string voidResponseString = JsonConvert.SerializeObject(voidResponse);
+                            //Asynchronously adds void transaction data to the VTEX transaction API in a fire-and-forget manner.
+                            _vtexTransactionService.AddTransactionVoidData(capturePaymentRequest.transactionId, voidResponseString);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _context.Vtex.Logger.Error("DoPartialCancellation", null, $"Error in processing partial cancellation: {ex.Message}");
+                }
             }
         }
 

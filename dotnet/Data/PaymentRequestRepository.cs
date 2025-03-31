@@ -136,6 +136,69 @@
             response.EnsureSuccessStatusCode();
         }
 
+        /// <summary>
+        /// Saves the void response for a transaction asynchronously in VTEX VBase.
+        /// </summary>
+        /// <param name="affirmVoidResponse">The AffirmVoidResponse object containing transaction details.</param>
+        /// <returns>Returns a Task that represents the asynchronous operation.</returns>
+        public async Task SaveVoidResponseAsync(AffirmVoidResponse affirmVoidResponse)
+        {
+            
+            var jsonSerializedAffirmVoidResponse = JsonConvert.SerializeObject(affirmVoidResponse);
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Put,
+                RequestUri = new Uri($"http://vbase.{this._environmentVariableProvider.Region}.vtex.io/{this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_ACCOUNT]}/master/buckets/{this._applicationName}/{RESPONSE_BUCKET}/files/{affirmVoidResponse.transactionId}"),
+                Content = new StringContent(jsonSerializedAffirmVoidResponse, Encoding.UTF8, APPLICATION_JSON)
+            };
+
+            string authToken = this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL];
+            if (authToken != null)
+            {
+                request.Headers.Add(AUTHORIZATION_HEADER_NAME, authToken);
+            }
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+        }
+
+        /// <summary>
+        /// Retrieves the void response for a given payment ID from the VTEX VBase storage.
+        /// </summary>
+        /// <param name="paymentId">The unique identifier of the payment transaction.</param>
+        /// <returns>
+        /// An <see cref="AffirmVoidResponse"/> object containing the void response details if found;
+        /// otherwise, returns <c>null</c> if the response is not found.
+        /// </returns>
+        public async Task<AffirmVoidResponse> GetVoidResponseAsync(string paymentId)
+        {
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"http://vbase.{this._environmentVariableProvider.Region}.vtex.io/{this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_ACCOUNT]}/master/buckets/{this._applicationName}/{RESPONSE_BUCKET}/files/{paymentId}"),
+            };
+
+            string authToken = this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL];
+            if (authToken != null)
+            {
+                request.Headers.Add(AUTHORIZATION_HEADER_NAME, authToken);
+            }
+
+            var response = await _httpClient.SendAsync(request);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+
+            // A helper method is in order for this as it does not return the stack trace etc.
+            response.EnsureSuccessStatusCode();
+
+            AffirmVoidResponse paymentResponse =  JsonConvert.DeserializeObject<AffirmVoidResponse>(responseContent);
+            return paymentResponse;
+        }
+
         public async Task<CreatePaymentResponse> GetPaymentResponseAsync(string paymentId)
         {
             // Console.WriteLine($"GetPaymentRequestAsync called with {this._httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_ACCOUNT]},master,{this._environmentVariableProvider.ApplicationName},{this._environmentVariableProvider.ApplicationVendor},{this._environmentVariableProvider.Region}");

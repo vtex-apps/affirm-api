@@ -185,6 +185,7 @@
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
             request.Headers.Add("X-Vtex-Use-Https", "true");
             request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
+            request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
@@ -241,6 +242,38 @@
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
             request.Headers.Add("X-Vtex-Use-Https", "true");
             request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
+            request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+
+            var response = await _httpClient.SendAsync(request);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            return ParseAffirmResponse(response, responseContent);
+        }
+
+        public async Task<JObject> VoidAsync(string publicApiKey, string privateApiKey, string chargeId, int voidAmount)
+        {
+            _context.Vtex.Logger.Info(
+                "VoidAsync",
+                null,
+                $"VoidAsync: Amount Passed: {voidAmount}, Charge ID: {chargeId}"
+            );
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri($"{affirmBaseUrl}/{AffirmConstants.Transactions}/{chargeId}/{AffirmConstants.Void}"),
+                Content = new StringContent(
+                    JsonConvert.SerializeObject(new {
+                        amount = voidAmount
+                    }),
+                    Encoding.UTF8,
+                    APPLICATION_JSON
+                )
+            };
+
+            request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{publicApiKey}:{privateApiKey}")));
+            request.Headers.Add("X-Vtex-Use-Https", "true");
+            request.Headers.Add("Proxy-Authorization", _httpContextAccessor.HttpContext.Request.Headers[HEADER_VTEX_CREDENTIAL].ToString());
+            request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
 
             var response = await _httpClient.SendAsync(request);
             string responseContent = await response.Content.ReadAsStringAsync();
